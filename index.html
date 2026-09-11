@@ -529,7 +529,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-10-ar</p>
+    <p class="versao-app">Versão do app: 2026-09-10-aw</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -1071,65 +1071,33 @@
     }
   }
 
-  function proximaEntradaRecorrente(dataAncoraISO){
-    const ancora = new Date(dataAncoraISO+'T00:00:00');
-    garantirRecorrencias(ancora.getFullYear(), ancora.getMonth());
-    const prox = new Date(ancora.getFullYear(), ancora.getMonth()+1, 1);
-    garantirRecorrencias(prox.getFullYear(), prox.getMonth());
-    const seguinte = new Date(ancora.getFullYear(), ancora.getMonth()+2, 1);
-    garantirRecorrencias(seguinte.getFullYear(), seguinte.getMonth());
-    const candidatas = state.movimentacoes.filter(m => m.tipo==='entrada' && m.data >= dataAncoraISO && (m.recorrente || m.origemRecorrenteId));
-    if(candidatas.length === 0) return null;
-    candidatas.sort((a,b)=>a.data.localeCompare(b.data));
-    const salario = candidatas.find(m=>m.categoria==='Salário');
-    return salario || candidatas[0];
-  }
-
-  function proximaEntradaRecorrente(){
-    const hoje = new Date();
-    garantirRecorrencias(hoje.getFullYear(), hoje.getMonth());
-    const prox = new Date(hoje.getFullYear(), hoje.getMonth()+1, 1);
-    garantirRecorrencias(prox.getFullYear(), prox.getMonth());
-    const hojeISO = todayISO();
-    const candidatas = state.movimentacoes.filter(m => m.tipo==='entrada' && m.data >= hojeISO && (m.recorrente || m.origemRecorrenteId));
-    if(candidatas.length === 0) return null;
-    candidatas.sort((a,b)=>a.data.localeCompare(b.data));
-    const salario = candidatas.find(m=>m.categoria==='Salário');
-    return salario || candidatas[0];
-  }
-
   function renderFolego(){
     const box = document.getElementById('folegoBox');
-    const prox = proximaEntradaRecorrente();
-    if(!prox){ box.style.display = 'none'; return; }
+    garantirRecorrencias(filtro.ano, filtro.mes);
+    const prefixo = filtro.ano+'-'+pad(filtro.mes+1)+'-';
+    // prioriza o lançamento que já faz parte de uma série recorrente (o "salário de verdade"),
+    // só cai pra qualquer um chamado Salário se ainda não existir série (ex: primeiro mês lançado)
+    const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
+    const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
+    if(!salarioMes){ box.style.display = 'none'; return; }
     box.style.display = 'block';
 
-    const saldoHoje = saldoAteHoje();
-    const hoje = new Date();
-    const inicio = new Date(hoje); inicio.setDate(inicio.getDate()+1);
-    const fim = new Date(prox.data+'T00:00:00');
-    let saidasPeriodo = 0, entradasPeriodo = 0;
-    if(inicio <= fim){
-      let d = new Date(inicio);
-      while(d <= fim){
-        const iso = isoDate(d.getFullYear(), d.getMonth(), d.getDate());
-        const t = totaisDoDia(iso);
-        saidasPeriodo += t.saidas + t.diario;
-        entradasPeriodo += t.entradas;
-        d.setDate(d.getDate()+1);
-      }
-    }
-    const resultado = saldoHoje + entradasPeriodo - saidasPeriodo;
-    const dataFormatada = formatBR(prox.data);
+    const diaSalario = Number(salarioMes.data.split('-')[2]);
+    const diaAnterior = diaSalario - 1;
+    const nomeMes = MESES[filtro.mes] + '/' + filtro.ano;
+    if(diaAnterior < 1){ box.style.display = 'none'; return; }
 
-    document.getElementById('folegoTitulo').textContent = 'Fôlego até ' + dataFormatada + ' (' + (prox.descricao || prox.categoria) + ')';
+    const dias = saldosDiariosDoMes(filtro.ano, filtro.mes);
+    const saldoFolego = dias[diaAnterior-1].saldo;
+
+    document.getElementById('folegoTitulo').textContent = 'Fôlego de ' + nomeMes + ' (véspera do salário, dia ' + diaAnterior + ')';
     const el = document.getElementById('folegoResultado');
-    if(resultado >= 0){
+    if(saldoFolego >= 0){
       el.className = 'ajuste-resultado pos';
-      el.innerHTML = 'Sobra <span class="valor">'+fmt(resultado)+'</span> até lá — os gastos previstos até essa data já estão cobertos pelo seu saldo de hoje.';
+      el.innerHTML = 'Sobra <span class="valor">'+fmt(saldoFolego)+'</span> no dia anterior ao salário de '+nomeMes+'.';
     }else{
       el.className = 'ajuste-resultado neg';
-      el.innerHTML = 'Falta <span class="valor">'+fmt(Math.abs(resultado))+'</span> até lá — é o quanto você precisaria ter a mais hoje (ou deixar de gastar) pra não apertar antes de '+dataFormatada+'.';
+      el.innerHTML = 'Falta <span class="valor">'+fmt(Math.abs(saldoFolego))+'</span> no dia anterior ao salário de '+nomeMes+'.';
     }
   }
 
