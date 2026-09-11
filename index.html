@@ -609,7 +609,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-11-by</p>
+    <p class="versao-app">Versão do app: 2026-09-11-bz</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -1347,9 +1347,11 @@
     }
     corteProjecao = janela.findIndex(j=>j.projetado);
     labels = janela.map(j => MESES_ABREV[j.mes]+'/'+String(j.ano).slice(2));
-    entradasArr = janela.map(j => j.projetado ? mediaEntradas/100 : totaisDoMes(j.ano,j.mes).entradas/100);
-    saidasArr = janela.map(j => j.projetado ? mediaSaidas/100 : totaisDoMes(j.ano,j.mes).saidaTotal/100);
-    economiaArr = janela.map((j,i) => j.projetado ? (mediaEntradas-mediaSaidas)/100 : totaisDoMes(j.ano,j.mes).economia/100);
+    // meses "projetados" usam o cálculo real (respeitando as recorrências já cadastradas pra aquele mês),
+    // igual aos meses passados — só a cor fica mais clara pra indicar que ainda pode mudar
+    entradasArr = janela.map(j => totaisDoMes(j.ano,j.mes).entradas/100);
+    saidasArr = janela.map(j => totaisDoMes(j.ano,j.mes).saidaTotal/100);
+    economiaArr = janela.map(j => totaisDoMes(j.ano,j.mes).economia/100);
     coresEntradas = janela.map(j => j.projetado ? 'rgba(34,227,178,.35)' : '#22E3B2');
     coresSaidas = janela.map(j => j.projetado ? 'rgba(255,107,133,.35)' : '#FF6B85');
     coresEconomia = janela.map(j => j.projetado ? 'rgba(255,180,73,.35)' : '#FFB449');
@@ -1391,7 +1393,7 @@
     document.getElementById('tituloGraficoExpandido').textContent = tipo==='saldo' ? 'Evolução do saldo — '+MESES[filtro.mes]+' de '+filtro.ano : 'Entradas, saídas e economia — últimos meses e projeção';
     const ctx = document.getElementById('chartExpandidoCanvas').getContext('2d');
     if(tipo==='saldo') renderChartSaldo(ctx, true); else renderChartComparativo(ctx, true);
-    document.getElementById('hintGraficoExpandido').textContent = (tipo==='comparativo' && ultimaComparativoTemProjecao) ? 'Barras mais claras = projeção dos próximos meses, com base na média dos últimos 3' : '';
+    document.getElementById('hintGraficoExpandido').textContent = (tipo==='comparativo' && ultimaComparativoTemProjecao) ? 'Barras mais claras = meses futuros, calculados com as recorrências já cadastradas (ainda pode mudar)' : '';
     document.getElementById('modalGraficoExpandido').classList.add('show');
   }
   document.getElementById('chartSaldoBox').addEventListener('click', () => abrirGraficoExpandido('saldo'));
