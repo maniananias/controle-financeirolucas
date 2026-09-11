@@ -122,13 +122,32 @@
   .ajuste-resultado .valor{font-family:'JetBrains Mono',monospace;font-weight:600;}
   .ajuste-resultado.pos .valor{color:var(--primary);}
   .ajuste-resultado.neg .valor{color:var(--danger);}
-  .folego-linha{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dotted var(--rule,var(--line));font-size:13px;}
+  .sim-veredito{font-size:14px;font-weight:500;line-height:1.5;padding:16px 16px 16px 18px;border-radius:var(--radius);margin-bottom:14px;background:var(--surface);border:1px solid rgba(255,255,255,.07);border-left:4px solid var(--line);}
+  .sim-veredito .valor{font-family:'JetBrains Mono',monospace;font-weight:700;}
+  .sim-veredito.pos{border-left-color:var(--primary);background:linear-gradient(90deg, rgba(34,227,178,.09), var(--surface) 40%);}
+  .sim-veredito.pos .valor{color:var(--primary);}
+  .sim-veredito.neg{border-left-color:var(--danger);background:linear-gradient(90deg, rgba(255,107,133,.10), var(--surface) 40%);}
+  .sim-veredito.neg .valor{color:var(--danger);}
+  .sim-campo-aninhado{margin:-4px 0 14px 4px;padding-left:14px;border-left:2px solid var(--line);}
+  .folego-linha{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dotted var(--rule,var(--line));font-size:13px;flex-wrap:wrap;gap:4px;}
   .folego-linha:last-child{border-bottom:none;}
   .folego-linha .mes-nome{color:var(--ink-soft);}
   .folego-linha .mes-nome.atual{color:var(--ink);font-weight:600;}
   .folego-linha b{font-family:'JetBrains Mono',monospace;font-weight:600;}
   .folego-linha b.pos{color:var(--primary);}
   .folego-linha b.neg{color:var(--danger);}
+  .folego-seta{color:var(--ink-soft);opacity:.5;font-size:13px;}
+  .folego-linha-v2{padding:10px 0;border-bottom:1px dotted var(--rule,var(--line));}
+  .folego-linha-v2:last-child{border-bottom:none;}
+  .folego-mes-header{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .folego-mes-header small{font-weight:500;color:var(--ink-soft);opacity:.7;}
+  .folego-comparativo{display:flex;align-items:center;gap:8px;}
+  .folego-col{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+  .folego-rotulo{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);opacity:.6;}
+  .folego-col b{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700;}
+  .folego-col b.pos{color:var(--primary);}
+  .folego-col b.neg{color:var(--danger);}
+  .folego-valor-neutro{color:var(--ink-soft);}
   .btn-simular-destaque{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,180,73,.35);background:var(--gold-soft);color:var(--gold);font-weight:600;font-size:13.5px;font-family:inherit;cursor:pointer;margin-bottom:16px;}
   .sim-intro{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 16px;}
 
@@ -554,12 +573,12 @@
     <div class="field"><label>Data</label><input type="date" id="simData"></div>
     <div class="field"><label>Categoria</label><select id="simCategoria"></select></div>
     <div class="checkbox-row"><input type="checkbox" id="simRecorrente"><label for="simRecorrente">Repetir todo mês</label></div>
-    <div class="field" id="simCampoQtd" style="display:none;"><label>Por quantos meses? (deixe vazio para sempre)</label><input type="number" id="simQtd" inputmode="numeric" min="1" placeholder="Ex: 5"></div>
+    <div class="field sim-campo-aninhado" id="simCampoQtd" style="display:none;"><label>Por quantos meses? (deixe vazio para sempre)</label><input type="number" id="simQtd" inputmode="numeric" min="1" placeholder="Ex: 5"></div>
 
     <button class="btn-primario" id="btnSimular" style="width:100%;margin:6px 0 18px;">Simular impacto</button>
 
     <div id="resultadoSimulacao" style="display:none;">
-      <div class="ajuste-resultado" id="simResumo" style="background:var(--surface);border-radius:var(--radius);padding:14px 15px;border:1px solid rgba(255,255,255,.07);margin-bottom:14px;"></div>
+      <div class="sim-veredito" id="simResumo"></div>
       <div class="ajuste-box" id="simFolegoBox" style="display:none;">
         <p class="ajuste-titulo">Fôlego mês a mês: com x sem essa decisão</p>
         <div id="simFolegoLista"></div>
@@ -587,6 +606,12 @@
     </div>
 
     <div class="config-section">
+      <h3>💼 Dia de recebimento</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">Usado pra calcular o Fôlego (véspera do salário) em todo o app — Dashboard, Extrato e Simulação. Se o mês tiver menos dias que esse número (ex: fevereiro), usa o último dia do mês.</p>
+      <div class="field"><label>Todo dia</label><input id="cfgDiaRecebimento" type="number" min="1" max="31" inputmode="numeric" placeholder="Ex: 25"></div>
+    </div>
+
+    <div class="config-section">
       <h3>🎯 Recalibrar saldo</h3>
       <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">Se o saldo atual do app não bate com o que você tem de verdade na conta hoje, digite o valor real aqui. O app cria um ajuste automático na data de hoje — nada do seu histórico anterior é alterado.</p>
       <div class="field"><label>Qual é o seu saldo real hoje?</label><input id="cfgSaldoReal" inputmode="numeric" placeholder="R$ 0,00"></div>
@@ -609,7 +634,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-11-bz</p>
+    <p class="versao-app">Versão do app: 2026-09-11-ci</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -874,6 +899,7 @@
     try{ const r = await storage.get('fin-diario-overrides', false); if(r) state.diarioOverrides = JSON.parse(r.value); }catch(e){}
     try{ const r = await storage.get('fin-metas', false); if(r) state.metas = JSON.parse(r.value); }catch(e){}
     migrarDiarioParaMovimentacoes();
+    migrarDiaRecebimento();
     repararSeriesCorrompidas();
   }
   // corrige lançamentos que ficaram marcados como "filho" (origemRecorrenteId) e "origem" (recorrente:true) ao mesmo tempo
@@ -931,6 +957,23 @@
     if(mudou) salvarMovimentacoes();
     salvarConfig();
     salvarOverrides();
+  }
+  // migração única: descobre o "dia de recebimento" a partir do salário mais recente já lançado,
+  // pra virar um número fixo em config em vez de procurar nos lançamentos toda vez (sem mudar nada do que já estava calculado)
+  function migrarDiaRecebimento(){
+    if(!state.config || state.config.diaRecebimento) return;
+    const salarios = state.movimentacoes
+      .filter(m => m.tipo==='entrada' && m.categoria==='Salário')
+      .sort((a,b) => b.data.localeCompare(a.data));
+    if(salarios.length > 0){
+      state.config.diaRecebimento = Number(salarios[0].data.split('-')[2]);
+      try{ storage.set('fin-config', JSON.stringify(state.config), false); }catch(e){} // silencioso, sem toast — é uma migração automática
+    }
+  }
+  // dia do salário naquele mês, sempre o mesmo número configurado (ajustado se o mês tiver menos dias, ex: fevereiro)
+  function diaSalarioConfigurado(ano, mes){
+    if(!state.config.diaRecebimento) return null;
+    return Math.min(state.config.diaRecebimento, daysInMonth(ano, mes));
   }
   async function salvarConfig(){ try{ await storage.set('fin-config', JSON.stringify(state.config), false); mostrarToast('Salvo'); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
   async function salvarMovimentacoes(){ try{ await storage.set('fin-movimentacoes', JSON.stringify(state.movimentacoes), false); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
@@ -1259,15 +1302,10 @@
   function renderFolego(){
     const box = document.getElementById('folegoBox');
     garantirRecorrencias(filtro.ano, filtro.mes);
-    const prefixo = filtro.ano+'-'+pad(filtro.mes+1)+'-';
-    // prioriza o lançamento que já faz parte de uma série recorrente (o "salário de verdade"),
-    // só cai pra qualquer um chamado Salário se ainda não existir série (ex: primeiro mês lançado)
-    const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
-    const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
-    if(!salarioMes){ box.style.display = 'none'; return; }
+    const diaSalario = diaSalarioConfigurado(filtro.ano, filtro.mes);
+    if(!diaSalario){ box.style.display = 'none'; return; }
     box.style.display = 'block';
 
-    const diaSalario = Number(salarioMes.data.split('-')[2]);
     const diaAnterior = diaSalario - 1;
     const nomeMes = MESES[filtro.mes] + '/' + filtro.ano;
     if(diaAnterior < 1){ box.style.display = 'none'; return; }
@@ -1321,34 +1359,35 @@
   function renderChartComparativo(ctx, grande){
     let labels, entradasArr, saidasArr, economiaArr, coresEntradas, coresSaidas, coresEconomia, temProjecao=false, corteProjecao=-1;
 
-    // janela rolante ancorada em hoje: começa no primeiro mês com dado real (sem meses vazios antes), até 12 meses projetados à frente
-    const hoje = new Date();
+    // janela rolante ancorada no mês selecionado no filtro (Dia/Mês/Ano do Dashboard), até 12 meses à frente dele
+    const hojeReal = new Date();
+    const anoRef = filtro.ano, mesRef = filtro.mes;
     let janela = [];
     for(let i=-11; i<=0; i++){
-      const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
-      janela.push({ano:d.getFullYear(), mes:d.getMonth(), projetado:false});
+      const d = new Date(anoRef, mesRef+i, 1);
+      janela.push({ano:d.getFullYear(), mes:d.getMonth()});
     }
-    // remove os meses vazios do começo (sem entrada nem saída), mantendo pelo menos o mês atual
+    // remove os meses vazios do começo (sem entrada nem saída), mantendo pelo menos o mês do filtro
     while(janela.length > 1){
       const t = totaisDoMes(janela[0].ano, janela[0].mes);
       if(t.entradas === 0 && t.saidaTotal === 0) janela.shift(); else break;
     }
     const ultimosReais = janela.slice(-3).map(j => totaisDoMes(j.ano,j.mes));
-    const mediaEntradas = ultimosReais.reduce((a,t)=>a+t.entradas,0)/ultimosReais.length;
-    const mediaSaidas = ultimosReais.reduce((a,t)=>a+t.saidaTotal,0)/ultimosReais.length;
-    const temHistoricoReal = mediaEntradas > 0 || mediaSaidas > 0;
+    const temHistoricoReal = ultimosReais.some(t => t.entradas > 0 || t.saidaTotal > 0);
     if(temHistoricoReal){
       const mesesFuturos = grande ? 12 : 3;
       for(let i=1; i<=mesesFuturos; i++){
-        const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
-        janela.push({ano:d.getFullYear(), mes:d.getMonth(), projetado:true});
+        const d = new Date(anoRef, mesRef+i, 1);
+        janela.push({ano:d.getFullYear(), mes:d.getMonth()});
       }
-      temProjecao = true;
     }
+    // "projetado" (cor mais clara) é qualquer mês depois do mês atual DE VERDADE — não do mês que está no filtro
+    janela.forEach(j => { j.projetado = (j.ano > hojeReal.getFullYear()) || (j.ano === hojeReal.getFullYear() && j.mes > hojeReal.getMonth()); });
+    temProjecao = janela.some(j => j.projetado);
     corteProjecao = janela.findIndex(j=>j.projetado);
     labels = janela.map(j => MESES_ABREV[j.mes]+'/'+String(j.ano).slice(2));
-    // meses "projetados" usam o cálculo real (respeitando as recorrências já cadastradas pra aquele mês),
-    // igual aos meses passados — só a cor fica mais clara pra indicar que ainda pode mudar
+    // todos os meses (inclusive os futuros) usam o cálculo real, respeitando as recorrências já cadastradas pra aquele mês —
+    // a cor mais clara só indica que o mês ainda não chegou de verdade, os números continuam exatos
     entradasArr = janela.map(j => totaisDoMes(j.ano,j.mes).entradas/100);
     saidasArr = janela.map(j => totaisDoMes(j.ano,j.mes).saidaTotal/100);
     economiaArr = janela.map(j => totaisDoMes(j.ano,j.mes).economia/100);
@@ -1451,15 +1490,13 @@
     const diaSimulado = Number(dataSim.split('-')[2]);
     const sinal = tipoSim==='entrada' ? 1 : -1;
     const resultados = [];
-    for(let i=0; i<6; i++){
+    let parcelasUsadas = 0;
+    for(let i=0; i<12; i++){
       const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
       const ano = d.getFullYear(), mes = d.getMonth();
       garantirRecorrencias(ano, mes);
-      const prefixo = ano+'-'+pad(mes+1)+'-';
-      const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
-      const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
-      if(!salarioMes) continue;
-      const diaSalario = Number(salarioMes.data.split('-')[2]);
+      const diaSalario = diaSalarioConfigurado(ano, mes);
+      if(!diaSalario) continue;
       const diaAntes = diaSalario - 1;
       if(diaAntes < 1) continue;
 
@@ -1470,14 +1507,19 @@
       const dias = saldosDiariosDoMes(ano, mes);
       const baseline = dias[diaAntes-1].saldo;
 
-      // uma parcela recorrente por mês (não acumula as anteriores); gasto único conta uma vez e persiste dali pra frente
+      // uma parcela recorrente por mês (não acumula as anteriores); gasto único conta uma vez e persiste dali pra frente.
+      // a contagem de quantas parcelas já foram usadas só avança quando a parcela realmente teve impacto naquele corte
       let ocorrencias = 1;
-      // no mês da própria decisão, se a véspera do salário cai antes do dia da parcela, essa parcela ainda não tinha vencido naquele corte
       if(diferencaMeses === 0 && diaSimulado > diaAntes) ocorrencias = 0;
-      if(recorrenteSim && qtdSim && diferencaMeses >= qtdSim) ocorrencias = 0;
+      if(recorrenteSim && qtdSim && ocorrencias === 1){
+        if(parcelasUsadas >= qtdSim) ocorrencias = 0;
+        else parcelasUsadas++;
+      }
 
       const impacto = sinal * ocorrencias * valorCents;
       resultados.push({ano, mes, diaAntes, baseline, simulado: baseline+impacto});
+      // já mostrou todos os meses com parcela ativa e mais um mês depois (confirmando que acabou) — pode parar
+      if(recorrenteSim && qtdSim && parcelasUsadas >= qtdSim && ocorrencias === 0 && diferencaMeses > 0) break;
     }
     return resultados;
   }
@@ -1497,15 +1539,15 @@
     const resumo = document.getElementById('simResumo');
     const mesesQueApertam = folegoResultados.filter(r => r.simulado < 0);
     if(folegoResultados.length === 0){
-      resumo.className = 'ajuste-resultado';
+      resumo.className = 'sim-veredito';
       resumo.innerHTML = 'Ainda não consegui achar seu salário cadastrado pra calcular se isso cabe no orçamento.';
     }else if(mesesQueApertam.length === 0){
-      resumo.className = 'ajuste-resultado pos';
+      resumo.className = 'sim-veredito pos';
       resumo.innerHTML = '✅ <b>Sim, dá pra pagar</b> — seu saldo continua positivo em todos os meses até o salário, mesmo com essa decisão.';
     }else{
       const primeiro = mesesQueApertam[0];
       const nomeMes = MESES[primeiro.mes]+'/'+primeiro.ano;
-      resumo.className = 'ajuste-resultado neg';
+      resumo.className = 'sim-veredito neg';
       resumo.innerHTML = '⚠️ <b>Não, isso vai apertar</b> — em '+nomeMes+' seu saldo fica negativo (<span class="valor">'+fmt(Math.abs(primeiro.simulado))+'</span> no vermelho) por causa dessa decisão.';
     }
 
@@ -1517,8 +1559,14 @@
       document.getElementById('simFolegoLista').innerHTML = folegoResultados.map(r => {
         const corBase = r.simulado>=0 ? 'pos' : 'neg';
         const ficaNegativo = r.baseline>=0 && r.simulado<0;
-        return '<div class="folego-linha"><span class="mes-nome">'+MESES[r.mes]+'/'+r.ano+' <small style="opacity:.6;">(dia '+r.diaAntes+')</small></span>'+
-          '<b class="'+corBase+'">'+fmt(r.simulado)+(ficaNegativo?' ⚠':'')+'</b></div>';
+        return '<div class="folego-linha-v2">'+
+          '<div class="folego-mes-header">'+MESES[r.mes]+'/'+r.ano+' <small>(dia '+r.diaAntes+')</small></div>'+
+          '<div class="folego-comparativo">'+
+            '<div class="folego-col"><span class="folego-rotulo">Sem decisão</span><b class="folego-valor-neutro">'+fmt(r.baseline)+'</b></div>'+
+            '<span class="folego-seta">→</span>'+
+            '<div class="folego-col"><span class="folego-rotulo">Com decisão</span><b class="'+corBase+'">'+fmt(r.simulado)+(ficaNegativo?' ⚠':'')+'</b></div>'+
+          '</div>'+
+        '</div>';
       }).join('');
     }
 
@@ -1933,32 +1981,24 @@
   }
   function addDiasISO(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return isoDate(d.getFullYear(), d.getMonth(), d.getDate()); }
 
-  // acha o dia (número) da véspera do salário daquele mês, ou null se não achar salário
+  // acha o dia (número) da véspera do salário daquele mês, ou null se não tiver dia de recebimento configurado
   function diaFolegoDoMes(ano, mes){
     garantirRecorrencias(ano, mes);
-    const prefixo = ano+'-'+pad(mes+1)+'-';
-    const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
-    const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
-    if(!salarioMes) return null;
-    const diaAnterior = Number(salarioMes.data.split('-')[2]) - 1;
+    const diaSalario = diaSalarioConfigurado(ano, mes);
+    if(!diaSalario) return null;
+    const diaAnterior = diaSalario - 1;
     return diaAnterior >= 1 ? diaAnterior : null;
   }
-  // acha a data (iso) do próximo salário a partir de uma data de referência (olha até 6 meses à frente)
+  // acha a data (iso) do próximo salário a partir de uma data de referência
   function proximoSalarioApartirDe(isoReferencia){
     const ref = parseISO(isoReferencia);
+    if(!state.config.diaRecebimento) return null;
     let ano = ref.ano, mes = ref.mes;
-    for(let i=0; i<6; i++){
-      garantirRecorrencias(ano, mes);
-      const prefixo = ano+'-'+pad(mes+1)+'-';
-      const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
-      const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
-      if(salarioMes){
-        const diaSalario = Number(salarioMes.data.split('-')[2]);
-        if(i > 0 || diaSalario > ref.dia) return salarioMes.data;
-      }
-      [ano, mes] = addMeses(ano, mes, 1);
-    }
-    return null;
+    const diaEsteMes = diaSalarioConfigurado(ano, mes);
+    if(diaEsteMes > ref.dia) return isoDate(ano, mes, diaEsteMes);
+    [ano, mes] = addMeses(ano, mes, 1);
+    const diaProxMes = diaSalarioConfigurado(ano, mes);
+    return isoDate(ano, mes, diaProxMes);
   }
   // saldo diário dia-a-dia para um intervalo arbitrário (pode cruzar meses)
   function saldosDiariosIntervalo(isoInicio, isoFim){
@@ -2374,10 +2414,16 @@
     setMoneyValue(document.getElementById('cfgSaldoInicial'), state.config.saldoInicial);
     setMoneyValue(document.getElementById('cfgOrcamento'), state.config.orcamentoMensal);
     setMoneyValue(document.getElementById('cfgSaldoMinimo'), state.config.saldoMinimo);
+    document.getElementById('cfgDiaRecebimento').value = state.config.diaRecebimento || '';
   }
   bindMoney(document.getElementById('cfgSaldoInicial'), c => { state.config.saldoInicial = c; limparCache(); salvarConfig(); });
   bindMoney(document.getElementById('cfgOrcamento'), c => { state.config.orcamentoMensal = c; salvarConfig(); });
   bindMoney(document.getElementById('cfgSaldoMinimo'), c => { state.config.saldoMinimo = c; salvarConfig(); });
+  document.getElementById('cfgDiaRecebimento').addEventListener('change', e => {
+    const v = Math.max(1, Math.min(31, Number(e.target.value) || 0));
+    if(v > 0){ state.config.diaRecebimento = v; limparCache(); salvarConfig(); }
+    e.target.value = state.config.diaRecebimento || '';
+  });
   bindMoney(document.getElementById('cfgSaldoReal'));
   document.getElementById('btnIrParaDiario').addEventListener('click', () => {
     irPara('movs');
