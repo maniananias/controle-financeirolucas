@@ -82,6 +82,7 @@
     background-color:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px 20px 4px 7px;
   }
   .btn-hoje{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--primary);background:var(--primary-soft);border:1px solid var(--primary);border-radius:9px;padding:5px 9px;cursor:pointer;}
+  .btn-fechar-tela{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink-soft);background:var(--surface-alt);border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;flex:none;}
 
   /* ---- cards do dashboard ---- */
   .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
@@ -467,7 +468,7 @@
 
   <!-- ===== SIMULAÇÃO ===== -->
   <section class="screen" id="screen-simulacao">
-    <div class="topbar"><h1>Simular decisão</h1></div>
+    <div class="topbar"><h1>Simular decisão</h1><button class="btn-fechar-tela" id="btnFecharSimulacao" type="button">✕ Fechar</button></div>
     <p class="sim-intro">Antes de gastar (ou receber) alguma coisa, teste aqui o impacto real nos próximos 12 meses — nada é lançado até você confirmar.</p>
 
     <div class="tipo-toggle">
@@ -484,6 +485,10 @@
 
     <div id="resultadoSimulacao" style="display:none;">
       <div class="ajuste-resultado" id="simResumo" style="background:var(--surface);border-radius:var(--radius);padding:14px 15px;border:1px solid rgba(255,255,255,.07);margin-bottom:14px;"></div>
+      <div class="ajuste-box" id="simFolegoBox" style="display:none;">
+        <p class="ajuste-titulo">Fôlego mês a mês: com x sem essa decisão</p>
+        <div id="simFolegoLista"></div>
+      </div>
       <div class="chart-box">
         <h3>Saldo projetado: com x sem essa decisão</h3>
         <div class="chart-canvas-wrap"><canvas id="chartSimulacao"></canvas></div>
@@ -529,7 +534,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-10-aw</p>
+    <p class="versao-app">Versão do app: 2026-09-11-be</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -590,6 +595,19 @@
       <div class="modal-acoes">
         <button class="btn-excluir" id="btnExcluirMov" style="display:none;">Excluir</button>
         <button class="btn-primario" id="btnSalvarMov">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL CONFIRMAR (substitui o confirm() nativo, que pode não funcionar em alguns navegadores/embeds) ===== -->
+  <div class="modal-overlay" id="modalConfirmar">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="confirmarTitulo">Confirma?</h2>
+      <p id="confirmarTexto" style="font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 18px;"></p>
+      <div class="modal-acoes">
+        <button class="btn-secundario" id="btnConfirmarNao">Cancelar</button>
+        <button class="btn-primario" id="btnConfirmarSim">Continuar</button>
       </div>
     </div>
   </div>
@@ -807,11 +825,32 @@
   async function salvarOverrides(){ try{ await storage.set('fin-diario-overrides', JSON.stringify(state.diarioOverrides), false); }catch(e){} }
   async function salvarMetas(){ try{ await storage.set('fin-metas', JSON.stringify(state.metas), false); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
 
-  function mostrarToast(msg){
+  function mostrarToast(msg, duracao){
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     clearTimeout(mostrarToast._t);
-    mostrarToast._t = setTimeout(()=>t.classList.remove('show'), 1500);
+    mostrarToast._t = setTimeout(()=>t.classList.remove('show'), duracao || 1500);
+  }
+
+  // substitui window.confirm() nativo (que pode falhar em alguns navegadores/webviews embutidos)
+  function confirmarApp(texto, titulo){
+    return new Promise((resolve) => {
+      document.getElementById('confirmarTitulo').textContent = titulo || 'Confirma?';
+      document.getElementById('confirmarTexto').textContent = texto;
+      const modal = document.getElementById('modalConfirmar');
+      modal.classList.add('show');
+      const btnSim = document.getElementById('btnConfirmarSim');
+      const btnNao = document.getElementById('btnConfirmarNao');
+      const limpar = () => {
+        modal.classList.remove('show');
+        btnSim.removeEventListener('click', onSim);
+        btnNao.removeEventListener('click', onNao);
+      };
+      const onSim = () => { limpar(); resolve(true); };
+      const onNao = () => { limpar(); resolve(false); };
+      btnSim.addEventListener('click', onSim);
+      btnNao.addEventListener('click', onNao);
+    });
   }
 
   // ================= cálculo =================
@@ -996,6 +1035,7 @@
     if(tela === 'simulacao') renderSimulacaoTela();
   }
   document.getElementById('btnAtalhoSimular').addEventListener('click', () => irPara('simulacao'));
+  document.getElementById('btnFecharSimulacao').addEventListener('click', () => irPara('dashboard'));
   document.getElementById('btnAbrirMenu').addEventListener('click', () => {
     const atual = document.querySelector('.screen.active').id.replace('screen-','');
     document.querySelectorAll('.mais-item').forEach(b => b.classList.toggle('mais-item-atual', b.dataset.screen === atual));
@@ -1256,6 +1296,42 @@
     return resultados;
   }
 
+  // fôlego (saldo na véspera do salário) de cada mês, com e sem a decisão simulada
+  function calcularFolegoComSimulacao(dataSim, tipoSim, valorCents, recorrenteSim, qtdSim){
+    const hoje = new Date();
+    const [ay,am] = dataSim.split('-').map(Number);
+    const simAno = ay, simMes = am-1;
+    const diaSimulado = Number(dataSim.split('-')[2]);
+    const sinal = tipoSim==='entrada' ? 1 : -1;
+    const resultados = [];
+    for(let i=0; i<6; i++){
+      const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
+      const ano = d.getFullYear(), mes = d.getMonth();
+      garantirRecorrencias(ano, mes);
+      const prefixo = ano+'-'+pad(mes+1)+'-';
+      const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
+      const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
+      if(!salarioMes) continue;
+      const diaSalario = Number(salarioMes.data.split('-')[2]);
+      const diaAntes = diaSalario - 1;
+      if(diaAntes < 1) continue;
+
+      const dias = saldosDiariosDoMes(ano, mes);
+      const baseline = dias[diaAntes-1].saldo;
+
+      const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
+      let ocorrencias = 0;
+      if(diferencaMeses > 0){
+        ocorrencias = recorrenteSim ? (qtdSim ? Math.min(diferencaMeses+1, qtdSim) : diferencaMeses+1) : 1;
+      }else if(diferencaMeses === 0 && diaSimulado <= diaAntes){
+        ocorrencias = 1;
+      }
+      const impacto = sinal * ocorrencias * valorCents;
+      resultados.push({ano, mes, diaAntes, baseline, simulado: baseline+impacto});
+    }
+    return resultados;
+  }
+
   document.getElementById('btnSimular').addEventListener('click', () => {
     const valor = centsFromInput(document.getElementById('simValor'));
     if(valor <= 0){ mostrarToast('Informe um valor válido'); return; }
@@ -1267,14 +1343,37 @@
     const resultados = calcularImpactoSimulado(data, simTipo, valor, recorrente, qtd);
     ultimaSimulacao = { data, tipo:simTipo, valor, categoria, recorrente, qtd };
 
+    const folegoResultados = calcularFolegoComSimulacao(data, simTipo, valor, recorrente, qtd);
+    const resumo = document.getElementById('simResumo');
+    const mesesQueApertam = folegoResultados.filter(r => r.simulado < 0);
+    if(folegoResultados.length === 0){
+      resumo.className = 'ajuste-resultado';
+      resumo.innerHTML = 'Ainda não consegui achar seu salário cadastrado pra calcular se isso cabe no orçamento.';
+    }else if(mesesQueApertam.length === 0){
+      resumo.className = 'ajuste-resultado pos';
+      resumo.innerHTML = '✅ <b>Sim, dá pra pagar</b> — seu saldo continua positivo em todos os meses até o salário, mesmo com essa decisão.';
+    }else{
+      const primeiro = mesesQueApertam[0];
+      const nomeMes = MESES[primeiro.mes]+'/'+primeiro.ano;
+      resumo.className = 'ajuste-resultado neg';
+      resumo.innerHTML = '⚠️ <b>Não, isso vai apertar</b> — em '+nomeMes+' seu saldo fica negativo (<span class="valor">'+fmt(Math.abs(primeiro.simulado))+'</span> no vermelho) por causa dessa decisão.';
+    }
+
+    const folegoBox = document.getElementById('simFolegoBox');
+    if(folegoResultados.length === 0){
+      folegoBox.style.display = 'none';
+    }else{
+      folegoBox.style.display = 'block';
+      document.getElementById('simFolegoLista').innerHTML = folegoResultados.map(r => {
+        const corBase = r.simulado>=0 ? 'pos' : 'neg';
+        const ficaNegativo = r.baseline>=0 && r.simulado<0;
+        return '<div class="folego-linha"><span class="mes-nome">'+MESES[r.mes]+'/'+r.ano+' <small style="opacity:.6;">(dia '+r.diaAntes+')</small></span>'+
+          '<b class="'+corBase+'">'+fmt(r.simulado)+(ficaNegativo?' ⚠':'')+'</b></div>';
+      }).join('');
+    }
+
     const ultimo = resultados[resultados.length-1];
     const diferenca = ultimo.simulado - ultimo.baseline;
-    const nomeUltimoMes = MESES[ultimo.mes] + '/' + ultimo.ano;
-    const resumo = document.getElementById('simResumo');
-    resumo.className = 'ajuste-resultado ' + (diferenca >= 0 ? 'pos' : 'neg');
-    resumo.innerHTML = 'Em ' + nomeUltimoMes + ', seu saldo projetado seria <span class="valor">' + fmt(ultimo.simulado) + '</span>' +
-      ' em vez de <span class="valor">' + fmt(ultimo.baseline) + '</span> — uma diferença de <span class="valor">' +
-      (diferenca>=0?'+':'') + fmt(diferenca) + '</span> por causa dessa decisão.';
 
     const ctx = document.getElementById('chartSimulacao').getContext('2d');
     if(chartSimulacao) chartSimulacao.destroy();
@@ -1477,9 +1576,9 @@
       '</div>'
     )).join('');
     el.querySelectorAll('.mov-item').forEach(item => item.addEventListener('click', () => abrirModalMov(item.dataset.id)));
-    el.querySelectorAll('.mov-del').forEach(btn => btn.addEventListener('click', (e) => {
+    el.querySelectorAll('.mov-del').forEach(btn => btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if(!confirm('Excluir esta movimentação?')) return;
+      if(!await confirmarApp('Excluir esta movimentação?', 'Excluir')) return;
       state.movimentacoes = state.movimentacoes.filter(m=>m.id!==btn.dataset.del);
       limparCache(); salvarMovimentacoes();
       mostrarToast('Movimentação excluída');
@@ -1616,16 +1715,16 @@
     document.getElementById('buscaMov').value = '';
     renderTelaAtual();
   });
-  document.getElementById('btnExcluirMov').addEventListener('click', () => {
+  document.getElementById('btnExcluirMov').addEventListener('click', async () => {
     const id = document.getElementById('movId').value;
     const atual = state.movimentacoes.find(m=>m.id===id);
     const origemId = idOrigemDaSerie(atual);
     const aplicarTodas = document.getElementById('movAplicarTodas').checked;
     if(aplicarTodas && origemId){
-      if(!confirm('Isso vai excluir TODAS as repetições dessa conta (passadas e futuras). Continuar?')) return;
+      if(!await confirmarApp('Isso vai excluir TODAS as repetições dessa conta (passadas e futuras). Continuar?', 'Excluir série')) return;
       state.movimentacoes = state.movimentacoes.filter(m => m.id !== origemId && m.origemRecorrenteId !== origemId);
     }else{
-      if(!confirm('Excluir esta movimentação?')) return;
+      if(!await confirmarApp('Excluir esta movimentação?', 'Excluir')) return;
       state.movimentacoes = state.movimentacoes.filter(m=>m.id!==id);
     }
     limparCache(); salvarMovimentacoes();
@@ -1900,9 +1999,9 @@
     document.getElementById('modalMeta').classList.remove('show');
     renderMetas();
   });
-  document.getElementById('btnExcluirMeta').addEventListener('click', () => {
+  document.getElementById('btnExcluirMeta').addEventListener('click', async () => {
     const id = document.getElementById('metaId').value;
-    if(!confirm('Excluir esta meta?')) return;
+    if(!await confirmarApp('Excluir esta meta?', 'Excluir meta')) return;
     state.metas = state.metas.filter(m=>m.id!==id);
     salvarMetas();
     document.getElementById('modalMeta').classList.remove('show');
@@ -2004,23 +2103,25 @@
   });
   document.getElementById('inputImportarBackup').addEventListener('change', (e) => {
     const arquivo = e.target.files[0];
-    if(!arquivo) return;
+    if(!arquivo){ mostrarToast('Nenhum arquivo foi selecionado', 4000); return; }
+    mostrarToast('Lendo "'+arquivo.name+'"...', 4000);
     const leitor = new FileReader();
+    leitor.onerror = () => { mostrarToast('Erro ao ler o arquivo: ' + (leitor.error ? leitor.error.message : 'desconhecido'), 6000); };
     leitor.onload = async () => {
       try{
         const backup = JSON.parse(leitor.result);
-        if(!backup.config || !Array.isArray(backup.movimentacoes)) throw new Error('formato inválido');
-        if(!confirm('Isso vai substituir os dados atuais pelos do backup. Continuar?')) return;
+        if(!backup.config || !Array.isArray(backup.movimentacoes)) throw new Error('o arquivo não tem o formato esperado (faltam campos config/movimentacoes)');
+        if(!await confirmarApp('Isso vai substituir os dados atuais pelos do backup. Continuar?', 'Importar backup')) return;
         state.config = backup.config;
         state.movimentacoes = backup.movimentacoes;
         state.diarioOverrides = backup.diarioOverrides || {};
         state.metas = backup.metas || [];
         limparCache();
         await salvarConfig(); await salvarMovimentacoes(); await salvarOverrides(); await salvarMetas();
-        mostrarToast('Backup importado');
+        mostrarToast('Backup importado com sucesso!', 3000);
         renderTelaAtual();
       }catch(err){
-        mostrarToast('Esse arquivo não é um backup válido');
+        mostrarToast('Erro ao importar: ' + err.message, 6000);
       }
       e.target.value = '';
     };
@@ -2050,7 +2151,7 @@
     irPara('dashboard');
   });
   document.getElementById('btnZerarTudo').addEventListener('click', async () => {
-    if(!confirm('Isso vai apagar todas as movimentações, metas e ajustes de gasto diário. Deseja continuar?')) return;
+    if(!await confirmarApp('Isso vai apagar todas as movimentações, metas e ajustes de gasto diário. Deseja continuar?', 'Apagar tudo')) return;
     state.movimentacoes = []; state.metas = []; state.diarioOverrides = {};
     limparCache();
     await salvarMovimentacoes(); await salvarMetas(); await salvarOverrides();
