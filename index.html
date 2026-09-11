@@ -43,19 +43,22 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  html{overflow-x:hidden;}
+  html{overflow-x:hidden;background:var(--bg);}
   body.modal-aberto{position:fixed;left:0;right:0;overflow:hidden;width:100%;}
   body{
     overflow-x:hidden;
-    background:
-      radial-gradient(560px 420px at 12% -6%, rgba(34,227,178,.16), transparent 60%),
-      radial-gradient(620px 480px at 100% 18%, rgba(108,124,255,.14), transparent 55%),
-      var(--bg);
-    background-attachment:fixed;
+    position:relative;
+    background:var(--bg);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
     padding-bottom:62px;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(560px 420px at 12% -6%, rgba(34,227,178,.16), transparent 60%),
+      radial-gradient(620px 480px at 100% 18%, rgba(108,124,255,.14), transparent 55%);
   }
   h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;letter-spacing:-.2px;}
   .mono{font-family:'JetBrains Mono',monospace;}
@@ -76,10 +79,15 @@
   /* ---- topo comum ---- */
   .topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px;}
   .topbar h1{font-size:21px;letter-spacing:-.3px;}
-  .periodo{display:flex;gap:5px;flex-wrap:wrap;width:100%;justify-content:flex-end;}
+  .periodo{display:flex;gap:6px;flex-wrap:wrap;width:100%;align-items:center;}
   .periodo select{
-    font-family:'Inter',sans-serif;font-size:16px;font-weight:600;color:var(--ink);
-    background-color:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px 20px 4px 7px;
+    font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--ink);
+    background-color:var(--surface);border:1px solid var(--line);border-radius:9px;
+    -webkit-appearance:none;-moz-appearance:none;appearance:none;
+    min-width:50px;text-align:center;
+    padding:6px 22px 6px 10px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2393A2B8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 8px center;background-size:9px 6px;
   }
   .btn-hoje{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--primary);background:var(--primary-soft);border:1px solid var(--primary);border-radius:9px;padding:5px 9px;cursor:pointer;}
   .btn-fechar-tela{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink-soft);background:var(--surface-alt);border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;flex:none;}
@@ -196,6 +204,56 @@
   .rel-tab.active{background:var(--gradient-primary);color:#fff;border-color:transparent;}
   .rel-view{display:none;}
   .rel-view.active{display:block;}
+  .extrato-range-tabs{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+  .extrato-range-tabs::-webkit-scrollbar{display:none;}
+  .extrato-range-btn{flex:0 0 auto;padding:7px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:color .15s,border-color .15s;}
+  .extrato-range-btn.active{background:var(--gradient-primary);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(34,227,178,.22);}
+  .extrato-dia{background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid rgba(255,255,255,.07);}
+  .extrato-dia-hoje{border-color:rgba(124,140,255,.5);}
+  .extrato-dia-vazio{opacity:.55;}
+  .extrato-dia-header{display:flex;justify-content:space-between;align-items:center;}
+  .extrato-dia-data{font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .extrato-dia-saldo{font-size:13.5px;font-weight:800;}
+  .extrato-dia-saldo.pos{color:#22E3B2;}
+  .extrato-dia-saldo.neg{color:#FF6B85;}
+  .extrato-dia-itens{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:4px;}
+  .extrato-item{display:flex;justify-content:space-between;gap:8px;font-size:12px;cursor:pointer;}
+  .extrato-item-cat{color:var(--ink-soft);}
+  .extrato-item-valor{font-weight:700;white-space:nowrap;}
+  .extrato-item-valor.entrada{color:#22E3B2;}
+  .extrato-item-valor.saida,.extrato-item-valor.diario{color:#FF6B85;}
+  .extrato-item-herdado{cursor:default;opacity:.75;}
+  .extrato-quiet{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;font-size:11px;color:var(--ink-soft);opacity:.65;}
+  .extrato-quiet small{opacity:.8;}
+  .extrato-quiet-info b{font-weight:700;}
+  .extrato-quiet-info b.pos{color:#22E3B2;}
+  .extrato-quiet-info b.neg{color:#FF6B85;}
+  .extrato-tabela-wrap{overflow-x:auto;border-radius:14px;border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);}
+  .extrato-tabela{width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed;}
+  .extrato-tabela thead th{position:sticky;top:0;background:var(--surface);color:var(--ink-soft);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:10px 3px;text-align:center;border-bottom:1px solid rgba(255,255,255,.1);}
+  .extrato-tabela td{padding:8px 3px;text-align:center;border-bottom:1px solid rgba(255,255,255,.045);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .extrato-tabela tbody tr:nth-child(even){background:rgba(255,255,255,.025);}
+  .extrato-tabela tbody tr:last-child td{border-bottom:none;}
+  .extrato-col-dia{width:20%;}
+  .extrato-col-num{width:20%;}
+  .extrato-col-dia{text-align:center;font-weight:700;color:var(--ink-soft);}
+  .extrato-col-dia small{display:block;margin-top:2px;font-weight:500;opacity:.55;text-transform:lowercase;font-size:8.5px;}
+  .extrato-entrada{background:rgba(34,227,178,.10);color:#22E3B2;font-weight:700;border-radius:6px;cursor:pointer;}
+  .extrato-saida{background:rgba(255,107,133,.11);color:#FF6B85;font-weight:700;border-radius:6px;cursor:pointer;}
+  .extrato-diario{color:#8C9BFF;cursor:pointer;transition:background .15s;border-radius:6px;}
+  .extrato-diario-com-valor{background:rgba(140,155,255,.11);font-weight:700;}
+  .extrato-diario:hover{background:rgba(140,155,255,.20);}
+  .extrato-zerar{font-size:9.5px;opacity:.4;font-style:italic;color:var(--ink-soft);}
+  .extrato-saldo{font-weight:800;background:rgba(255,193,90,.09);color:#FFC15A;}
+  .extrato-saldo.neg{background:rgba(255,107,133,.15);color:#FF6B85;}
+  tr.extrato-linha-hoje{background:rgba(124,140,255,.07);}
+  tr.extrato-linha-hoje td{box-shadow:inset 0 1px 0 rgba(124,140,255,.4),inset 0 -1px 0 rgba(124,140,255,.4);}
+  tr.extrato-linha-hoje td:first-child{box-shadow:inset 0 1px 0 rgba(124,140,255,.4),inset 0 -1px 0 rgba(124,140,255,.4),inset 3px 0 0 rgba(124,140,255,.6);}
+  tr.extrato-linha-folego .extrato-saldo{background:rgba(34,227,178,.22);color:#22E3B2;}
+  tr.extrato-linha-folego .extrato-saldo.neg{background:rgba(255,107,133,.16);color:#FF6B85;}
+  .extrato-legenda{font-size:10.5px;color:var(--ink-soft);opacity:.75;margin:10px 2px 0;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.6;}
+  .extrato-legenda-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(34,227,178,.5);}
+  .extrato-legenda-dot.neg{background:rgba(255,107,133,.6);}
   .mes-card{background:var(--surface);border-radius:14px;padding:12px 14px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07);}
   .mes-card-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
   .mes-card-nome{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;}
@@ -238,12 +296,17 @@
   /* ---- configurações ---- */
   .config-section{background:var(--surface);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.07);margin-bottom:14px;}
   .config-section h3{font-size:13.5px;margin-bottom:12px;}
-  .field{margin-bottom:12px;}
+  .field{margin-bottom:12px;min-width:0;}
   .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
   .field input, .field select, .field textarea{
-    width:100%;padding:10px 11px;border-radius:10px;border:1px solid var(--line);background-color:var(--surface-alt);color:var(--ink);font-size:16px;font-family:inherit;
+    width:100%;max-width:100%;min-width:0;padding:10px 11px;border-radius:10px;border:1px solid var(--line);background-color:var(--surface-alt);color:var(--ink);font-size:16px;font-family:inherit;
   }
+  .field input[type=date]{-webkit-appearance:none;appearance:none;}
   .field select{padding-right:30px;}
+  .valor-soma-row{display:flex;gap:6px;align-items:stretch;}
+  .valor-soma-row input{flex:1;min-width:0;}
+  .btn-somar{flex:0 0 auto;width:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface-alt);color:var(--primary);font-size:18px;font-weight:700;cursor:pointer;line-height:1;}
+  .btn-somar:active{background:var(--primary-soft);}
   .switch-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
   .switch{position:relative;width:42px;height:24px;flex:0 0 auto;}
   .switch input{opacity:0;width:0;height:0;}
@@ -291,7 +354,7 @@
   .modal-overlay.show{display:flex;}
   .modal-sheet{
     background:var(--surface);width:100%;max-width:480px;border-radius:20px 20px 0 0;
-    padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;
+    padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;overflow-x:hidden;
   }
   .modal-handle{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 14px;}
   .modal-title{font-size:16px;margin-bottom:14px;}
@@ -339,9 +402,10 @@
     <div class="topbar">
       <h1>Visão geral</h1>
       <div class="periodo">
+        <button id="btnHoje" class="btn-hoje" type="button" title="Voltar para hoje">Hoje</button>
+        <select id="dashDia"></select>
         <select id="dashMes"></select>
         <select id="dashAno"></select>
-        <button id="btnHoje" class="btn-hoje" type="button" title="Voltar para hoje">Hoje</button>
       </div>
     </div>
 
@@ -416,13 +480,24 @@
   <section class="screen" id="screen-relatorios">
     <div class="topbar"><h1>Relatórios</h1></div>
     <div class="rel-tabs">
-      <div class="rel-tab active" data-rel="fechamento">Fechamento</div>
+      <div class="rel-tab active" data-rel="extrato">Extrato</div>
+      <div class="rel-tab" data-rel="fechamento">Fechamento</div>
       <div class="rel-tab" data-rel="categorias">Categorias</div>
       <div class="rel-tab" data-rel="evolucao">Evolução</div>
       <div class="rel-tab" data-rel="comparacao">Comparar</div>
     </div>
 
-    <div class="rel-view active" id="rel-fechamento">
+    <div class="rel-view active" id="rel-extrato">
+      <div class="extrato-range-tabs">
+        <button class="extrato-range-btn active" data-range="salario" type="button">Até o salário</button>
+        <button class="extrato-range-btn" data-range="30" type="button">30 dias</button>
+        <button class="extrato-range-btn" data-range="60" type="button">60 dias</button>
+        <button class="extrato-range-btn" data-range="90" type="button">90 dias</button>
+      </div>
+      <div id="tabelaExtrato"></div>
+    </div>
+
+    <div class="rel-view" id="rel-fechamento">
       <div class="ano-compare-select"><select id="fechamentoAno"></select></div>
       <div id="tabelaFechamento"></div>
     </div>
@@ -534,7 +609,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-11-be</p>
+    <p class="versao-app">Versão do app: 2026-09-11-by</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -584,7 +659,12 @@
         <button type="button" id="btnTipoDiario">🔁 Diário</button>
       </div>
       <div class="field"><label>Data</label><input type="date" id="movData"></div>
-      <div class="field"><label>Valor</label><input id="movValor" inputmode="numeric" placeholder="R$ 0,00"></div>
+      <div class="field"><label>Valor</label>
+        <div class="valor-soma-row">
+          <input id="movValor" inputmode="numeric" placeholder="R$ 0,00">
+          <button type="button" class="btn-somar" data-somar="movValor" title="Somar outro valor (ex: 20 + 10)">+</button>
+        </div>
+      </div>
       <div class="field"><label>Categoria</label><select id="movCategoria"></select></div>
       <div class="field"><label>Descrição (opcional)</label><input type="text" id="movDescricao" placeholder="Ex: almoço com a equipe"></div>
       <div class="field"><label>Forma de pagamento</label><select id="movForma"></select></div>
@@ -609,6 +689,37 @@
         <button class="btn-secundario" id="btnConfirmarNao">Cancelar</button>
         <button class="btn-primario" id="btnConfirmarSim">Continuar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL EDITAR DIÁRIO DO DIA (edição rápida a partir do Extrato) ===== -->
+  <div class="modal-overlay" id="modalDiarioDia">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" data-close-modal type="button">✕</button>
+      <h2 class="modal-title" id="diaDiarioTitulo">Diário do dia</h2>
+      <input type="hidden" id="diaDiarioIso">
+      <div class="field"><label>Gasto diário nesse dia</label>
+        <div class="valor-soma-row">
+          <input id="diaDiarioValor" inputmode="numeric" placeholder="R$ 0,00">
+          <button type="button" class="btn-somar" data-somar="diaDiarioValor" title="Somar outro valor (ex: 20 + 10)">+</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:-6px 0 16px;">Isso muda só esse dia — os outros continuam com o valor padrão.</p>
+      <div class="modal-acoes">
+        <button class="btn-secundario" id="btnDiaDiarioRemover" style="display:none;">Voltar ao padrão</button>
+        <button class="btn-primario" id="btnDiaDiarioSalvar">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALHE DO DIA (ver o que compõe o total de Entrada/Saída do dia) ===== -->
+  <div class="modal-overlay" id="modalDetalheDia">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" data-close-modal type="button">✕</button>
+      <h2 class="modal-title" id="detalheDiaTitulo">Lançamentos do dia</h2>
+      <div id="detalheDiaLista"></div>
     </div>
   </div>
 
@@ -731,6 +842,7 @@
   function todayISO(){ const d=new Date(); return isoDate(d.getFullYear(), d.getMonth(), d.getDate()); }
   function formatBR(iso){ const [y,m,d]=iso.split('-'); return d+'/'+m+'/'+y; }
   function fmt(cents){ return ((cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+  function fmtNum(cents){ return ((cents||0)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
   function daysInMonth(ano,mesIdx0){ return new Date(ano,mesIdx0+1,0).getDate(); }
 
@@ -989,11 +1101,44 @@
   }
 
   // ================= máscara de moeda =================
-  function centsFromInput(el){ const d = el.value.replace(/\D/g,''); return d ? parseInt(d) : 0; }
+  // aceita expressões simples tipo "20+10-5" (soma/subtrai na hora de ler o valor),
+  // sem atrapalhar o jeito normal de digitar (só um valor)
+  function centsFromInput(el){
+    const raw = el.value;
+    if(/[+-]/.test(raw)){
+      const termos = raw.match(/[+-]?\d+/g);
+      if(!termos) return 0;
+      return termos.reduce((soma,t) => soma + parseInt(t,10), 0);
+    }
+    const d = raw.replace(/\D/g,'');
+    return d ? parseInt(d) : 0;
+  }
   function bindMoney(el, onChange){
-    el.addEventListener('input', () => { const c = centsFromInput(el); el.value = c ? fmt(c) : ''; if(onChange) onChange(c); });
+    el.addEventListener('input', () => {
+      if(/[+-]/.test(el.value)){
+        // modo "conta": deixa o usuário terminar de digitar a expressão antes de somar
+        el.value = el.value.replace(/[^\d+\-]/g, '');
+        if(onChange) onChange(centsFromInput(el));
+        return;
+      }
+      const c = centsFromInput(el); el.value = c ? fmt(c) : ''; if(onChange) onChange(c);
+    });
+    el.addEventListener('blur', () => {
+      if(/[+-]/.test(el.value)){
+        const c = centsFromInput(el);
+        el.value = c ? fmt(c) : '';
+        if(onChange) onChange(c);
+      }
+    });
   }
   function setMoneyValue(el, cents){ el.value = cents ? fmt(cents) : ''; }
+  document.querySelectorAll('.btn-somar').forEach(btn => btn.addEventListener('click', () => {
+    const el = document.getElementById(btn.dataset.somar);
+    if(!el) return;
+    const atual = centsFromInput(el);
+    el.value = (atual > 0 ? String(atual) : '') + '+';
+    el.focus();
+  }));
 
   // ---- fechar modais (X ou toque fora, exceto o gráfico expandido — esse só fecha pelo X) ----
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -1283,12 +1428,12 @@
     for(let i=0; i<12; i++){
       const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
       const ano = d.getFullYear(), mes = d.getMonth();
-      const baseline = totaisDoMes(ano,mes).saldoFinal;
       const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
-      let ocorrencias = 0;
-      if(diferencaMeses >= 0){
-        ocorrencias = recorrenteSim ? (qtdSim ? Math.min(diferencaMeses+1, qtdSim) : diferencaMeses+1) : 1;
-      }
+      if(diferencaMeses < 0) continue; // antes do mês da decisão, não mostra (não tem impacto nenhum)
+      const baseline = totaisDoMes(ano,mes).saldoFinal;
+      // uma parcela recorrente por mês (não acumula as anteriores); gasto único conta uma vez e persiste dali pra frente
+      let ocorrencias = 1;
+      if(recorrenteSim && qtdSim && diferencaMeses >= qtdSim) ocorrencias = 0;
       const sinal = tipoSim==='entrada' ? 1 : -1;
       const impacto = sinal * ocorrencias * valorCents;
       resultados.push({ano, mes, baseline, simulado: baseline+impacto});
@@ -1316,16 +1461,19 @@
       const diaAntes = diaSalario - 1;
       if(diaAntes < 1) continue;
 
+      const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
+      // antes do mês da decisão — ainda não existe, não mostra
+      if(diferencaMeses < 0) continue;
+
       const dias = saldosDiariosDoMes(ano, mes);
       const baseline = dias[diaAntes-1].saldo;
 
-      const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
-      let ocorrencias = 0;
-      if(diferencaMeses > 0){
-        ocorrencias = recorrenteSim ? (qtdSim ? Math.min(diferencaMeses+1, qtdSim) : diferencaMeses+1) : 1;
-      }else if(diferencaMeses === 0 && diaSimulado <= diaAntes){
-        ocorrencias = 1;
-      }
+      // uma parcela recorrente por mês (não acumula as anteriores); gasto único conta uma vez e persiste dali pra frente
+      let ocorrencias = 1;
+      // no mês da própria decisão, se a véspera do salário cai antes do dia da parcela, essa parcela ainda não tinha vencido naquele corte
+      if(diferencaMeses === 0 && diaSimulado > diaAntes) ocorrencias = 0;
+      if(recorrenteSim && qtdSim && diferencaMeses >= qtdSim) ocorrencias = 0;
+
       const impacto = sinal * ocorrencias * valorCents;
       resultados.push({ano, mes, diaAntes, baseline, simulado: baseline+impacto});
     }
@@ -1418,10 +1566,21 @@
 
   function renderDashboard(){
     garantirRecorrencias(filtro.ano, filtro.mes);
-    const dashMes = document.getElementById('dashMes'), dashAno = document.getElementById('dashAno');
+    const dashDia = document.getElementById('dashDia'), dashMes = document.getElementById('dashMes'), dashAno = document.getElementById('dashAno');
     if(!dashMes.dataset.ready){ popularSelectMeses(dashMes); dashMes.dataset.ready='1'; }
     if(!dashAno.dataset.ready){ popularSelectAnos(dashAno, filtro.ano); dashAno.dataset.ready='1'; }
+    const nDias = daysInMonth(filtro.ano, filtro.mes);
+    if(filtro.dia > nDias) filtro.dia = nDias;
+    if(dashDia.dataset.dias != nDias){
+      dashDia.innerHTML = Array.from({length:nDias}, (_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');
+      dashDia.dataset.dias = nDias;
+    }
+    dashDia.value = filtro.dia;
     dashMes.value = filtro.mes; dashAno.value = filtro.ano;
+
+    const hoje = new Date();
+    const estaEmHoje = (filtro.ano === hoje.getFullYear() && filtro.mes === hoje.getMonth() && filtro.dia === hoje.getDate());
+    document.getElementById('btnHoje').style.display = estaEmHoje ? 'none' : 'inline-block';
 
     const t = totaisDoMes(filtro.ano, filtro.mes);
     document.getElementById('cardSaldo').textContent = fmt(saldoAteHoje());
@@ -1466,11 +1625,13 @@
   }
   function iconeAlerta(tipo){ return tipo==='positivo'?'✓':tipo==='alerta-forte'?'⚠':'ℹ'; }
 
+  document.getElementById('dashDia').addEventListener('change', e => { filtro.dia = Number(e.target.value); renderDashboard(); });
   document.getElementById('dashMes').addEventListener('change', e => { filtro.mes = Number(e.target.value); renderDashboard(); });
   document.getElementById('dashAno').addEventListener('change', e => { filtro.ano = Number(e.target.value); renderDashboard(); });
   document.getElementById('btnHoje').addEventListener('click', () => {
-    filtro.ano = new Date().getFullYear(); filtro.mes = new Date().getMonth();
+    filtro.ano = new Date().getFullYear(); filtro.mes = new Date().getMonth(); filtro.dia = new Date().getDate();
     document.getElementById('dashAno').dataset.ready = '';
+    document.getElementById('dashDia').dataset.dias = '';
     renderDashboard();
   });
 
@@ -1748,6 +1909,7 @@
     document.getElementById('compAnoA').value = Math.max(state.config.anoInicial, filtro.ano-1);
     document.getElementById('compAnoB').value = filtro.ano;
 
+    renderExtrato();
     renderFechamento();
     renderCategorias();
     renderEvolucao();
@@ -1758,6 +1920,182 @@
     document.querySelectorAll('.rel-view').forEach(v=>v.classList.remove('active'));
     document.getElementById('rel-'+tab.dataset.rel).classList.add('active');
   }));
+
+  const DIAS_SEMANA_ABREV = ['dom','seg','ter','qua','qui','sex','sáb'];
+  function parseISO(iso){ const [y,m,d] = iso.split('-').map(Number); return {ano:y, mes:m-1, dia:d}; }
+  function addMeses(ano, mesIdx0, n){
+    const total = mesIdx0 + n;
+    const anoNovo = ano + Math.floor(total/12);
+    const mesNovo = ((total % 12) + 12) % 12;
+    return [anoNovo, mesNovo];
+  }
+  function addDiasISO(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return isoDate(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+  // acha o dia (número) da véspera do salário daquele mês, ou null se não achar salário
+  function diaFolegoDoMes(ano, mes){
+    garantirRecorrencias(ano, mes);
+    const prefixo = ano+'-'+pad(mes+1)+'-';
+    const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
+    const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
+    if(!salarioMes) return null;
+    const diaAnterior = Number(salarioMes.data.split('-')[2]) - 1;
+    return diaAnterior >= 1 ? diaAnterior : null;
+  }
+  // acha a data (iso) do próximo salário a partir de uma data de referência (olha até 6 meses à frente)
+  function proximoSalarioApartirDe(isoReferencia){
+    const ref = parseISO(isoReferencia);
+    let ano = ref.ano, mes = ref.mes;
+    for(let i=0; i<6; i++){
+      garantirRecorrencias(ano, mes);
+      const prefixo = ano+'-'+pad(mes+1)+'-';
+      const candidatosSerie = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo) && (m.recorrente || m.origemRecorrenteId));
+      const salarioMes = candidatosSerie[0] || state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
+      if(salarioMes){
+        const diaSalario = Number(salarioMes.data.split('-')[2]);
+        if(i > 0 || diaSalario > ref.dia) return salarioMes.data;
+      }
+      [ano, mes] = addMeses(ano, mes, 1);
+    }
+    return null;
+  }
+  // saldo diário dia-a-dia para um intervalo arbitrário (pode cruzar meses)
+  function saldosDiariosIntervalo(isoInicio, isoFim){
+    const inicio = parseISO(isoInicio), fim = parseISO(isoFim);
+    let anoC = inicio.ano, mesC = inicio.mes;
+    while(anoC < fim.ano || (anoC===fim.ano && mesC<=fim.mes)){
+      garantirRecorrencias(anoC, mesC);
+      [anoC, mesC] = addMeses(anoC, mesC, 1);
+    }
+    let saldo = inicio.dia === 1 ? saldoInicialDoMes(inicio.ano, inicio.mes) : saldoAteODia(inicio.ano, inicio.mes, inicio.dia-1);
+    const arr = [];
+    let iso = isoInicio;
+    let guarda = 0;
+    while(guarda < 400){
+      const t = totaisDoDia(iso);
+      saldo += t.entradas - t.saidas - t.diario;
+      const p = parseISO(iso);
+      arr.push({ dia:p.dia, mes:p.mes, ano:p.ano, iso, saldo, ...t });
+      if(iso === isoFim) break;
+      iso = addDiasISO(iso, 1);
+      guarda++;
+    }
+    return arr;
+  }
+  // dias que são "véspera do salário" dentro de um intervalo (pode ter mais de 1 se o intervalo for longo)
+  function diasFolegoNoIntervalo(isoInicio, isoFim){
+    const set = new Set();
+    const inicio = parseISO(isoInicio), fim = parseISO(isoFim);
+    let ano = inicio.ano, mes = inicio.mes;
+    while(ano < fim.ano || (ano===fim.ano && mes<=fim.mes)){
+      const dv = diaFolegoDoMes(ano, mes);
+      if(dv){
+        const iso = isoDate(ano, mes, dv);
+        if(iso >= isoInicio && iso <= isoFim) set.add(iso);
+      }
+      [ano, mes] = addMeses(ano, mes, 1);
+    }
+    return set;
+  }
+
+  let extratoRangeAtivo = 'salario';
+  document.querySelectorAll('.extrato-range-btn').forEach(btn => btn.addEventListener('click', () => {
+    extratoRangeAtivo = btn.dataset.range;
+    document.querySelectorAll('.extrato-range-btn').forEach(b => b.classList.toggle('active', b===btn));
+    renderExtrato();
+  }));
+
+  function renderExtrato(){
+    const hojeISO = todayISO();
+    let isoFim;
+    if(extratoRangeAtivo === 'salario'){
+      isoFim = proximoSalarioApartirDe(hojeISO) || addDiasISO(hojeISO, 30);
+    }else{
+      isoFim = addDiasISO(hojeISO, Number(extratoRangeAtivo));
+    }
+    const dias = saldosDiariosIntervalo(hojeISO, isoFim);
+    const diasFolego = diasFolegoNoIntervalo(hojeISO, isoFim);
+
+    const linhas = dias.map(d => {
+      const diaSemana = DIAS_SEMANA_ABREV[new Date(d.ano, d.mes, d.dia).getDay()];
+      const classesExtra = [];
+      if(d.iso === hojeISO) classesExtra.push('extrato-linha-hoje');
+      if(diasFolego.has(d.iso)) classesExtra.push('extrato-linha-folego');
+      const saldoNeg = d.saldo < 0;
+      return '<tr class="'+classesExtra.join(' ')+'">'+
+        '<td class="extrato-col-dia">'+String(d.dia).padStart(2,'0')+'/'+String(d.mes+1).padStart(2,'0')+'/'+String(d.ano).slice(-2)+'<small>'+diaSemana+'</small></td>'+
+        '<td class="extrato-col-num'+(d.entradas>0 ? ' extrato-entrada' : '')+'" data-iso="'+d.iso+'" data-tipo="entrada">'+(d.entradas>0 ? fmtNum(d.entradas) : '')+'</td>'+
+        '<td class="extrato-col-num'+(d.saidas>0 ? ' extrato-saida' : '')+'" data-iso="'+d.iso+'" data-tipo="saida">'+(d.saidas>0 ? fmtNum(d.saidas) : '')+'</td>'+
+        '<td class="extrato-col-num extrato-diario'+(d.diario>0 ? ' extrato-diario-com-valor' : '')+'" data-iso="'+d.iso+'">'+(d.diario>0 ? fmtNum(d.diario) : '<span class="extrato-zerar">def.</span>')+'</td>'+
+        '<td class="extrato-col-num extrato-saldo'+(saldoNeg?' neg':'')+'">'+fmtNum(d.saldo)+'</td>'+
+      '</tr>';
+    }).join('');
+
+    const html = '<div class="extrato-tabela-wrap"><table class="extrato-tabela">'+
+      '<thead><tr><th></th><th>Entr.</th><th>Saída</th><th>Diário</th><th>Saldo</th></tr></thead>'+
+      '<tbody>'+linhas+'</tbody>'+
+    '</table></div>'+
+    '<p class="extrato-legenda">valores em R$ &nbsp;·&nbsp; '+(diasFolego.size > 0 ? '<span class="extrato-legenda-dot folego"></span> véspera do salário &nbsp; ' : '')+'<span class="extrato-legenda-dot neg"></span> saldo negativo</p>';
+
+    document.getElementById('tabelaExtrato').innerHTML = html;
+    document.querySelectorAll('#tabelaExtrato .extrato-diario[data-iso]').forEach(td => td.addEventListener('click', () => abrirEditorDiarioDia(td.dataset.iso)));
+    document.querySelectorAll('#tabelaExtrato .extrato-entrada[data-iso], #tabelaExtrato .extrato-saida[data-iso]').forEach(td => td.addEventListener('click', () => abrirDetalheDia(td.dataset.iso, td.dataset.tipo)));
+  }
+
+  function abrirDetalheDia(iso, tipo){
+    const movs = movimentacoesDoDia(iso).filter(m => m.tipo === tipo).sort((a,b) => (a.criadoEm||'').localeCompare(b.criadoEm||''));
+    const [y,mNum,d] = iso.split('-').map(Number);
+    document.getElementById('detalheDiaTitulo').textContent = (tipo==='entrada'?'Entradas de ':'Saídas de ') + String(d).padStart(2,'0')+'/'+String(mNum).padStart(2,'0')+'/'+y;
+    document.getElementById('detalheDiaLista').innerHTML = movs.map(m => (
+      '<div class="extrato-item" data-id="'+m.id+'">'+
+        '<span class="extrato-item-cat">'+(CAT_ICONES[m.categoria]||'')+' '+m.categoria+(m.descricao?' — '+m.descricao:'')+'</span>'+
+        '<span class="extrato-item-valor '+m.tipo+'">'+(m.tipo==='entrada'?'+':'−')+' '+fmt(m.valor)+'</span>'+
+      '</div>'
+    )).join('');
+    document.querySelectorAll('#detalheDiaLista .extrato-item[data-id]').forEach(el => el.addEventListener('click', () => {
+      document.getElementById('modalDetalheDia').classList.remove('show');
+      abrirModalMov(el.dataset.id);
+    }));
+    document.getElementById('modalDetalheDia').classList.add('show');
+  }
+
+  bindMoney(document.getElementById('diaDiarioValor'));
+  function abrirEditorDiarioDia(iso){
+    const [y,m,d] = iso.split('-').map(Number);
+    document.getElementById('diaDiarioTitulo').textContent = 'Diário de ' + String(d).padStart(2,'0')+'/'+String(m).padStart(2,'0')+'/'+y;
+    document.getElementById('diaDiarioIso').value = iso;
+    const avulso = state.movimentacoes.find(mv => mv.tipo==='diario' && mv.data===iso && !mv.recorrenteDiario);
+    setMoneyValue(document.getElementById('diaDiarioValor'), avulso ? avulso.valor : diarioValorParaDia(iso));
+    document.getElementById('btnDiaDiarioRemover').style.display = avulso ? 'inline-block' : 'none';
+    document.getElementById('modalDiarioDia').classList.add('show');
+  }
+  document.getElementById('btnDiaDiarioSalvar').addEventListener('click', async () => {
+    const iso = document.getElementById('diaDiarioIso').value;
+    const valor = centsFromInput(document.getElementById('diaDiarioValor'));
+    const avulso = state.movimentacoes.find(mv => mv.tipo==='diario' && mv.data===iso && !mv.recorrenteDiario);
+    if(avulso){
+      avulso.valor = valor;
+    }else{
+      state.movimentacoes.push({
+        id: uid(), data: iso, tipo:'diario', valor, categoria:'Outros',
+        descricao:'Ajuste manual do dia', formaPagamento:'Dinheiro',
+        recorrente:false, recorrenteDiario:false, recorrenteQtdMeses:null,
+        origemRecorrenteId:null, criadoEm:new Date().toISOString()
+      });
+    }
+    limparCache(); await salvarMovimentacoes();
+    document.getElementById('modalDiarioDia').classList.remove('show');
+    mostrarToast('Diário do dia atualizado');
+    renderTelaAtual();
+  });
+  document.getElementById('btnDiaDiarioRemover').addEventListener('click', async () => {
+    const iso = document.getElementById('diaDiarioIso').value;
+    state.movimentacoes = state.movimentacoes.filter(mv => !(mv.tipo==='diario' && mv.data===iso && !mv.recorrenteDiario));
+    limparCache(); await salvarMovimentacoes();
+    document.getElementById('modalDiarioDia').classList.remove('show');
+    mostrarToast('Voltou pro valor padrão');
+    renderTelaAtual();
+  });
+
 
   let fechamentoMostrarTudo = false;
   function renderFechamento(){
@@ -2220,7 +2558,7 @@
       anoInicial,
       diarioMigrado: true
     };
-    filtro = { ano: new Date().getFullYear(), mes: new Date().getMonth() };
+    filtro = { ano: new Date().getFullYear(), mes: new Date().getMonth(), dia: new Date().getDate() };
     if(diarioValorInicial > 0){
       state.movimentacoes.push({
         id: uid(), data: todayISO(), tipo:'diario', valor: diarioValorInicial, categoria:'Outros',
