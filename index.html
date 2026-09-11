@@ -74,12 +74,12 @@
   #screen-dashboard{ padding-top:calc(22px + env(safe-area-inset-top)); }
 
   /* ---- topo comum ---- */
-  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px;}
   .topbar h1{font-size:21px;letter-spacing:-.3px;}
-  .periodo{display:flex;gap:6px;}
+  .periodo{display:flex;gap:5px;flex-wrap:wrap;width:100%;justify-content:flex-end;}
   .periodo select{
     font-family:'Inter',sans-serif;font-size:16px;font-weight:600;color:var(--ink);
-    background-color:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px 22px 4px 8px;
+    background-color:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px 20px 4px 7px;
   }
   .btn-hoje{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--primary);background:var(--primary-soft);border:1px solid var(--primary);border-radius:9px;padding:5px 9px;cursor:pointer;}
 
@@ -113,6 +113,13 @@
   .ajuste-resultado .valor{font-family:'JetBrains Mono',monospace;font-weight:600;}
   .ajuste-resultado.pos .valor{color:var(--primary);}
   .ajuste-resultado.neg .valor{color:var(--danger);}
+  .folego-linha{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dotted var(--rule,var(--line));font-size:13px;}
+  .folego-linha:last-child{border-bottom:none;}
+  .folego-linha .mes-nome{color:var(--ink-soft);}
+  .folego-linha .mes-nome.atual{color:var(--ink);font-weight:600;}
+  .folego-linha b{font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .folego-linha b.pos{color:var(--primary);}
+  .folego-linha b.neg{color:var(--danger);}
   .btn-simular-destaque{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,180,73,.35);background:var(--gold-soft);color:var(--gold);font-weight:600;font-size:13.5px;font-family:inherit;cursor:pointer;margin-bottom:16px;}
   .sim-intro{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 16px;}
 
@@ -175,6 +182,7 @@
   .mov-valor{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px;flex:0 0 auto;}
   .mov-valor.entrada{color:var(--primary);}
   .mov-valor.saida{color:var(--danger);}
+  .mov-valor.diario{color:var(--gold);}
   .mov-del{background:none;border:none;color:var(--ink-faint);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;}
   .mov-del:hover{color:var(--danger);}
   .empty-state{text-align:center;padding:44px 20px;color:var(--ink-faint);font-size:13px;}
@@ -290,6 +298,7 @@
   .tipo-toggle button{flex:1;padding:11px;border-radius:11px;border:2px solid var(--line);background:var(--surface);font-weight:600;font-size:13.5px;color:var(--ink-soft);cursor:pointer;transition:.15s;}
   .tipo-toggle button.active-entrada{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);}
   .tipo-toggle button.active-saida{background:var(--danger-soft);border-color:var(--danger);color:var(--danger);}
+  .tipo-toggle button.active-diario{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);}
   .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
   .modal-acoes{display:flex;gap:8px;margin-top:6px;}
   .btn-primario{flex:1;padding:13px;border-radius:12px;border:none;background:var(--gradient-primary);color:#fff;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 6px 18px rgba(34,227,178,.18);}
@@ -397,7 +406,7 @@
     </div>
     <div class="filtros-select">
       <select id="filtroCategoria"><option value="">Todas categorias</option></select>
-      <select id="filtroTipo"><option value="">Todos os tipos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option></select>
+      <select id="filtroTipo"><option value="">Todos os tipos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option><option value="diario">Gasto diário</option></select>
     </div>
     <div id="listaMovs"></div>
   </section>
@@ -506,11 +515,8 @@
 
     <div class="config-section">
       <h3>🔁 Gasto diário</h3>
-      <div class="switch-row">
-        <span>Lançar automaticamente</span>
-        <label class="switch"><input type="checkbox" id="cfgDiarioAtivo"><span class="switch-track"></span></label>
-      </div>
-      <div class="field"><label>Valor diário padrão</label><input id="cfgDiarioValor" inputmode="numeric" placeholder="R$ 0,00"></div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">O Gasto Diário agora é lançado direto pela aba Movimentações (toque no + e escolha "🔁 Diário"), pra ficar visível no seu histórico. Marque "usar como valor padrão de todo dia" pra ele repetir sozinho, todo dia, até você trocar por outro.</p>
+      <button class="btn-secundario" id="btnIrParaDiario" style="width:100%;">Ver/lançar gasto diário</button>
     </div>
 
     <div class="config-section">
@@ -523,7 +529,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-09-ak</p>
+    <p class="versao-app">Versão do app: 2026-09-10-ar</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -570,36 +576,21 @@
       <div class="tipo-toggle">
         <button type="button" id="btnTipoEntrada">↑ Entrada</button>
         <button type="button" id="btnTipoSaida">↓ Saída</button>
+        <button type="button" id="btnTipoDiario">🔁 Diário</button>
       </div>
       <div class="field"><label>Data</label><input type="date" id="movData"></div>
       <div class="field"><label>Valor</label><input id="movValor" inputmode="numeric" placeholder="R$ 0,00"></div>
       <div class="field"><label>Categoria</label><select id="movCategoria"></select></div>
       <div class="field"><label>Descrição (opcional)</label><input type="text" id="movDescricao" placeholder="Ex: almoço com a equipe"></div>
       <div class="field"><label>Forma de pagamento</label><select id="movForma"></select></div>
-      <div class="checkbox-row"><input type="checkbox" id="movRecorrente"><label for="movRecorrente">Repetir todo mês</label></div>
+      <div class="checkbox-row" id="checkboxRecorrenteMensal"><input type="checkbox" id="movRecorrente"><label for="movRecorrente">Repetir todo mês</label></div>
       <div class="field" id="campoRecorrenteAte" style="display:none;"><label>Repetir por quantos meses? (deixe vazio para repetir sempre)</label><input type="number" id="movRecorrenteQtd" inputmode="numeric" min="1" placeholder="Ex: 5"></div>
+      <div class="checkbox-row" id="checkboxRecorrenteDiario" style="display:none;"><input type="checkbox" id="movRecorrenteDiario"><label for="movRecorrenteDiario">Usar como valor padrão de todo dia, a partir de hoje</label></div>
       <div class="checkbox-row" id="checkboxAplicarTodas" style="display:none;"><input type="checkbox" id="movAplicarTodas"><label for="movAplicarTodas">Aplicar essa mudança a todas as repetições desta conta</label></div>
       <div class="modal-acoes">
         <button class="btn-excluir" id="btnExcluirMov" style="display:none;">Excluir</button>
         <button class="btn-primario" id="btnSalvarMov">Salvar</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ===== MODAL GASTO DIÁRIO ===== -->
-  <div class="modal-overlay" id="modalDiario">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <button class="modal-close" data-close-modal type="button">✕</button>
-      <h2 class="modal-title">Gasto diário</h2>
-      <div class="switch-row">
-        <span>Lançar automaticamente todo dia</span>
-        <label class="switch"><input type="checkbox" id="diarioAtivoModal"><span class="switch-track"></span></label>
-      </div>
-      <div class="field"><label>Valor padrão</label><input id="diarioValorModal" inputmode="numeric" placeholder="R$ 0,00"></div>
-      <p style="font-size:12px;color:var(--ink-soft);margin:10px 0 4px;">Ajustar um dia específico do mês selecionado:</p>
-      <div class="diario-lista" id="diarioLista"></div>
-      <div class="modal-acoes"><button class="btn-primario" id="btnFecharDiario">Concluído</button></div>
     </div>
   </div>
 
@@ -732,7 +723,7 @@
     diarioOverrides: {},
     metas: []
   };
-  let filtro = { ano: new Date().getFullYear(), mes: new Date().getMonth() };
+  let filtro = { ano: new Date().getFullYear(), mes: new Date().getMonth(), dia: new Date().getDate() };
   let saldoCache = {};
   function limparCache(){ saldoCache = {}; }
 
@@ -752,6 +743,64 @@
     try{ const r = await storage.get('fin-movimentacoes', false); if(r) state.movimentacoes = JSON.parse(r.value); }catch(e){}
     try{ const r = await storage.get('fin-diario-overrides', false); if(r) state.diarioOverrides = JSON.parse(r.value); }catch(e){}
     try{ const r = await storage.get('fin-metas', false); if(r) state.metas = JSON.parse(r.value); }catch(e){}
+    migrarDiarioParaMovimentacoes();
+    repararSeriesCorrompidas();
+  }
+  // corrige lançamentos que ficaram marcados como "filho" (origemRecorrenteId) e "origem" (recorrente:true) ao mesmo tempo
+  function repararSeriesCorrompidas(){
+    let mudou = false;
+    state.movimentacoes.forEach(m => {
+      if(m.origemRecorrenteId && m.recorrente){
+        m.recorrente = false;
+        m.recorrenteQtdMeses = null;
+        mudou = true;
+      }
+    });
+    if(mudou) salvarMovimentacoes();
+  }
+  // migração única: converte o antigo "gasto diário" (config + ajustes por dia) em lançamentos de verdade,
+  // sem alterar nenhum valor já calculado no passado.
+  function migrarDiarioParaMovimentacoes(){
+    if(!state.config || state.config.diarioMigrado) return;
+    let mudou = false;
+    let ultimoZero = null;
+    Object.keys(state.diarioOverrides || {}).forEach(iso => {
+      const v = state.diarioOverrides[iso];
+      if(v && v > 0){
+        state.movimentacoes.push({
+          id: uid(), data: iso, tipo:'diario', valor:v, categoria:'Outros',
+          descricao:'Gasto diário', formaPagamento:'Dinheiro',
+          recorrente:false, recorrenteDiario:false, recorrenteQtdMeses:null,
+          origemRecorrenteId:null, criadoEm:new Date().toISOString()
+        });
+        mudou = true;
+      }else if(v === 0){
+        if(!ultimoZero || iso > ultimoZero) ultimoZero = iso;
+      }
+    });
+    if(state.config.diarioAtivo && state.config.diarioValor > 0){
+      // o valor padrão só vale de verdade a partir do dia seguinte ao último dia explicitamente zerado
+      // (senão dias que estavam zerados no sistema antigo passariam a cobrar do nada)
+      let dataOrigem;
+      if(ultimoZero){
+        const d = new Date(ultimoZero+'T00:00:00'); d.setDate(d.getDate()+1);
+        dataOrigem = isoDate(d.getFullYear(), d.getMonth(), d.getDate());
+      }else{
+        dataOrigem = isoDate(state.config.anoInicial, 0, 1);
+      }
+      state.movimentacoes.push({
+        id: uid(), data: dataOrigem, tipo:'diario', valor: state.config.diarioValor, categoria:'Outros',
+        descricao:'Gasto diário padrão', formaPagamento:'Dinheiro',
+        recorrente:false, recorrenteDiario:true, recorrenteQtdMeses:null,
+        origemRecorrenteId:null, criadoEm:new Date().toISOString()
+      });
+      mudou = true;
+    }
+    state.diarioOverrides = {};
+    state.config.diarioMigrado = true;
+    if(mudou) salvarMovimentacoes();
+    salvarConfig();
+    salvarOverrides();
   }
   async function salvarConfig(){ try{ await storage.set('fin-config', JSON.stringify(state.config), false); mostrarToast('Salvo'); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
   async function salvarMovimentacoes(){ try{ await storage.set('fin-movimentacoes', JSON.stringify(state.movimentacoes), false); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
@@ -766,12 +815,22 @@
   }
 
   // ================= cálculo =================
+  // "Diário" agora é um lançamento de verdade (tipo='diario'), visível nas Movimentações.
+  // Um lançamento avulso naquele dia exato vale só pra aquele dia.
+  // Um lançamento marcado como "recorrenteDiario" vira o valor padrão de todo dia, a partir da própria data, até que outro recorrenteDiario mais recente o substitua.
+  function diarioMovimentacaoParaDia(iso){
+    const avulso = state.movimentacoes.filter(m => m.tipo==='diario' && m.data===iso && !m.recorrenteDiario);
+    if(avulso.length > 0) return avulso[avulso.length-1];
+    const origens = state.movimentacoes.filter(m => m.tipo==='diario' && m.recorrenteDiario && m.data <= iso);
+    if(origens.length === 0) return null;
+    origens.sort((a,b) => b.data.localeCompare(a.data));
+    return origens[0];
+  }
   function diarioValorParaDia(iso){
-    if(Object.prototype.hasOwnProperty.call(state.diarioOverrides, iso)){
-      const v = state.diarioOverrides[iso];
-      return v === null ? 0 : v;
-    }
-    return state.config.diarioAtivo ? state.config.diarioValor : 0;
+    const avulso = state.movimentacoes.filter(m => m.tipo==='diario' && m.data===iso && !m.recorrenteDiario);
+    if(avulso.length > 0) return avulso.reduce((a,m)=>a+m.valor,0);
+    const m = diarioMovimentacaoParaDia(iso);
+    return m ? m.valor : 0;
   }
   function movimentacoesDoDia(iso){ return state.movimentacoes.filter(m => m.data === iso); }
   function totaisDoDia(iso){
@@ -832,6 +891,11 @@
     const hoje = new Date();
     const dias = saldosDiariosDoMes(hoje.getFullYear(), hoje.getMonth());
     return dias[hoje.getDate()-1].saldo;
+  }
+  function saldoAteODia(ano,mes,dia){
+    const dias = saldosDiariosDoMes(ano,mes);
+    const idx = Math.min(Math.max(dia,1), dias.length) - 1;
+    return dias[idx].saldo;
   }
 
   function garantirRecorrencias(ano,mes){
@@ -1007,6 +1071,20 @@
     }
   }
 
+  function proximaEntradaRecorrente(dataAncoraISO){
+    const ancora = new Date(dataAncoraISO+'T00:00:00');
+    garantirRecorrencias(ancora.getFullYear(), ancora.getMonth());
+    const prox = new Date(ancora.getFullYear(), ancora.getMonth()+1, 1);
+    garantirRecorrencias(prox.getFullYear(), prox.getMonth());
+    const seguinte = new Date(ancora.getFullYear(), ancora.getMonth()+2, 1);
+    garantirRecorrencias(seguinte.getFullYear(), seguinte.getMonth());
+    const candidatas = state.movimentacoes.filter(m => m.tipo==='entrada' && m.data >= dataAncoraISO && (m.recorrente || m.origemRecorrenteId));
+    if(candidatas.length === 0) return null;
+    candidatas.sort((a,b)=>a.data.localeCompare(b.data));
+    const salario = candidatas.find(m=>m.categoria==='Salário');
+    return salario || candidatas[0];
+  }
+
   function proximaEntradaRecorrente(){
     const hoje = new Date();
     garantirRecorrencias(hoje.getFullYear(), hoje.getMonth());
@@ -1026,6 +1104,7 @@
     if(!prox){ box.style.display = 'none'; return; }
     box.style.display = 'block';
 
+    const saldoHoje = saldoAteHoje();
     const hoje = new Date();
     const inicio = new Date(hoje); inicio.setDate(inicio.getDate()+1);
     const fim = new Date(prox.data+'T00:00:00');
@@ -1040,7 +1119,6 @@
         d.setDate(d.getDate()+1);
       }
     }
-    const saldoHoje = saldoAteHoje();
     const resultado = saldoHoje + entradasPeriodo - saidasPeriodo;
     const dataFormatada = formatBR(prox.data);
 
@@ -1329,35 +1407,13 @@
     renderDashboard();
   });
 
-  // ---- modal gasto diário ----
-  document.getElementById('cardDiarioBtn').addEventListener('click', abrirModalDiario);
-  function abrirModalDiario(){
-    document.getElementById('diarioAtivoModal').checked = !!state.config.diarioAtivo;
-    setMoneyValue(document.getElementById('diarioValorModal'), state.config.diarioValor);
-    const lista = document.getElementById('diarioLista');
-    const n = daysInMonth(filtro.ano, filtro.mes);
-    let html = '';
-    for(let d=1; d<=n; d++){
-      const iso = isoDate(filtro.ano, filtro.mes, d);
-      const val = diarioValorParaDia(iso);
-      html += '<div class="diario-dia"><span>Dia '+d+'</span><input data-iso="'+iso+'" class="mono diario-input" value="'+(val?fmt(val):'')+'" placeholder="R$ 0,00" inputmode="numeric"></div>';
-    }
-    lista.innerHTML = html;
-    lista.querySelectorAll('.diario-input').forEach(el => {
-      bindMoney(el, (cents) => {
-        state.diarioOverrides[el.dataset.iso] = cents === 0 ? 0 : cents;
-        limparCache(); salvarOverrides();
-      });
-    });
-    document.getElementById('modalDiario').classList.add('show');
-  }
-  document.getElementById('diarioAtivoModal').addEventListener('change', e => {
-    state.config.diarioAtivo = e.target.checked; limparCache(); salvarConfig();
-  });
-  bindMoney(document.getElementById('diarioValorModal'), c => { state.config.diarioValor = c; limparCache(); salvarConfig(); });
-  document.getElementById('btnFecharDiario').addEventListener('click', () => {
-    document.getElementById('modalDiario').classList.remove('show');
-    renderDashboard();
+  // ---- toque no cartão "Gastos diários" abre Movimentações já filtrado ----
+  document.getElementById('cardDiarioBtn').addEventListener('click', () => {
+    irPara('movs');
+    periodoAtivo = 'Este mês';
+    document.querySelectorAll('#chipsPeriodo .chip').forEach(c => c.classList.toggle('active', c.dataset.p === periodoAtivo));
+    document.getElementById('filtroTipo').value = 'diario';
+    renderListaMovs();
   });
 
   // ================= MOVIMENTAÇÕES =================
@@ -1445,9 +1501,9 @@
     el.innerHTML = lista.map(m => (
       '<div class="mov-item" data-id="'+m.id+'">'+
         '<div class="mov-tag" style="background:'+(CAT_CORES[m.categoria]||'#999')+'"></div>'+
-        '<div class="mov-info"><div class="mov-cat">'+(CAT_ICONES[m.categoria]||'')+' '+m.categoria+'</div>'+
+        '<div class="mov-info"><div class="mov-cat">'+(m.tipo==='diario'?'🔁 ':(CAT_ICONES[m.categoria]||''))+' '+(m.tipo==='diario'?'Diário · ':'')+m.categoria+'</div>'+
         '<div class="mov-desc">'+(m.descricao || m.formaPagamento || '')+'</div>'+
-        '<div class="mov-data">'+formatBR(m.data)+(m.recorrente?' · recorrente':'')+'</div></div>'+
+        '<div class="mov-data">'+formatBR(m.data)+(m.recorrente?' · recorrente':'')+(m.recorrenteDiario?' · padrão diário':'')+'</div></div>'+
         '<div class="mov-right"><span class="mov-valor '+m.tipo+'">'+(m.tipo==='entrada'?'+':'−')+' '+fmt(m.valor)+'</span>'+
         '<button class="mov-del" data-del="'+m.id+'" title="Excluir">🗑</button></div>'+
       '</div>'
@@ -1476,6 +1532,12 @@
     tipoSelecionado = tipo;
     document.getElementById('btnTipoEntrada').className = tipo==='entrada' ? 'active-entrada' : '';
     document.getElementById('btnTipoSaida').className = tipo==='saida' ? 'active-saida' : '';
+    document.getElementById('btnTipoDiario').className = tipo==='diario' ? 'active-diario' : '';
+    document.getElementById('checkboxRecorrenteMensal').style.display = tipo==='diario' ? 'none' : 'flex';
+    document.getElementById('checkboxRecorrenteDiario').style.display = tipo==='diario' ? 'flex' : 'none';
+    if(tipo==='diario'){
+      document.getElementById('campoRecorrenteAte').style.display = 'none';
+    }
     if(sugerirCategoria){
       const catEl = document.getElementById('movCategoria');
       if(!catEl.value) catEl.value = tipo==='entrada' ? 'Salário' : 'Outros';
@@ -1483,6 +1545,7 @@
   }
   document.getElementById('btnTipoEntrada').addEventListener('click', () => setTipoModal('entrada', true));
   document.getElementById('btnTipoSaida').addEventListener('click', () => setTipoModal('saida', true));
+  document.getElementById('btnTipoDiario').addEventListener('click', () => setTipoModal('diario', true));
 
   function idOrigemDaSerie(m){
     if(!m) return null;
@@ -1511,7 +1574,12 @@
       document.getElementById('movForma').value = m.formaPagamento;
       document.getElementById('movRecorrente').checked = !!m.recorrente;
       document.getElementById('movRecorrenteQtd').value = m.recorrenteQtdMeses || '';
+      document.getElementById('movRecorrenteDiario').checked = !!m.recorrenteDiario;
       document.getElementById('checkboxAplicarTodas').style.display = idOrigemDaSerie(m) ? 'flex' : 'none';
+      // um lançamento GERADO (filho de uma série) não pode virar origem própria — isso corrompia os dados
+      const ehFilhoDeSerie = !!m.origemRecorrenteId;
+      document.getElementById('checkboxRecorrenteMensal').style.display = (ehFilhoDeSerie || m.tipo==='diario') ? 'none' : 'flex';
+      if(ehFilhoDeSerie) document.getElementById('campoRecorrenteAte').style.display = 'none';
     }else{
       document.getElementById('movId').value = '';
       setTipoModal('saida', false);
@@ -1522,6 +1590,7 @@
       document.getElementById('movForma').selectedIndex = 0;
       document.getElementById('movRecorrente').checked = false;
       document.getElementById('movRecorrenteQtd').value = '';
+      document.getElementById('movRecorrenteDiario').checked = false;
       document.getElementById('checkboxAplicarTodas').style.display = 'none';
     }
     document.getElementById('campoRecorrenteAte').style.display = document.getElementById('movRecorrente').checked ? 'block' : 'none';
@@ -1537,11 +1606,13 @@
     const valor = centsFromInput(document.getElementById('movValor'));
     const categoria = document.getElementById('movCategoria').value;
     const data = document.getElementById('movData').value || todayISO();
-    if(valor <= 0){ mostrarToast('Falta um valor válido'); return; }
+    if(valor <= 0 && tipoSelecionado !== 'diario'){ mostrarToast('Falta um valor válido'); return; }
     if(!categoria){ mostrarToast('Escolha uma categoria'); return; }
     const id = document.getElementById('movId').value;
-    const recorrente = document.getElementById('movRecorrente').checked;
+    const ehDiario = tipoSelecionado === 'diario';
+    const recorrente = ehDiario ? false : document.getElementById('movRecorrente').checked;
     const recorrenteQtdMeses = recorrente ? (parseInt(document.getElementById('movRecorrenteQtd').value) || null) : null;
+    const recorrenteDiario = ehDiario ? document.getElementById('movRecorrenteDiario').checked : false;
     const aplicarTodas = document.getElementById('movAplicarTodas').checked;
     const payloadComum = {
       tipo: tipoSelecionado, valor, categoria,
@@ -1551,6 +1622,7 @@
     if(id){
       const atual = state.movimentacoes.find(m=>m.id===id);
       const origemId = idOrigemDaSerie(atual);
+      const ehFilhoDeSerie = !!atual.origemRecorrenteId;
       if(aplicarTodas && origemId){
         movimentacoesDaSerie(origemId).forEach(m => {
           Object.assign(m, payloadComum);
@@ -1559,10 +1631,13 @@
         atual.data = data;
       }else{
         const idx = state.movimentacoes.findIndex(m=>m.id===id);
-        state.movimentacoes[idx] = { ...state.movimentacoes[idx], ...payloadComum, data, recorrente, recorrenteQtdMeses };
+        // um lançamento gerado (filho) nunca pode virar origem própria — só o "aplicar a todas" mexe na recorrência
+        const recorrenteFinal = ehFilhoDeSerie ? false : recorrente;
+        const qtdFinal = ehFilhoDeSerie ? null : recorrenteQtdMeses;
+        state.movimentacoes[idx] = { ...state.movimentacoes[idx], ...payloadComum, data, recorrente: recorrenteFinal, recorrenteQtdMeses: qtdFinal, recorrenteDiario };
       }
     }else{
-      state.movimentacoes.push({ id: uid(), origemRecorrenteId:null, criadoEm:new Date().toISOString(), ...payloadComum, data, recorrente, recorrenteQtdMeses });
+      state.movimentacoes.push({ id: uid(), origemRecorrenteId:null, criadoEm:new Date().toISOString(), ...payloadComum, data, recorrente, recorrenteQtdMeses, recorrenteDiario });
     }
     limparCache(); salvarMovimentacoes();
     document.getElementById('modalMov').classList.remove('show');
@@ -1655,12 +1730,15 @@
     const ano = Number(document.getElementById('catAno').value || filtro.ano);
     const mes = Number(document.getElementById('catMes').value || filtro.mes);
     garantirRecorrencias(ano, mes);
-    const n = daysInMonth(ano,mes);
     const porCategoria = {};
+    const n = daysInMonth(ano,mes);
     for(let d=1; d<=n; d++){
       const iso = isoDate(ano,mes,d);
-      const diario = diarioValorParaDia(iso);
-      if(diario>0) porCategoria['Gasto Diário'] = (porCategoria['Gasto Diário']||0) + diario;
+      const diaM = diarioMovimentacaoParaDia(iso);
+      if(diaM){
+        const valorDia = diaM.recorrenteDiario ? diaM.valor : diaM.valor; // valor daquele dia (avulso já é só daquele dia)
+        porCategoria[diaM.categoria] = (porCategoria[diaM.categoria]||0) + valorDia;
+      }
     }
     state.movimentacoes.filter(m => m.tipo==='saida' && m.data.startsWith(ano+'-'+pad(mes+1)))
       .forEach(m => { porCategoria[m.categoria] = (porCategoria[m.categoria]||0) + m.valor; });
@@ -1889,15 +1967,18 @@
     setMoneyValue(document.getElementById('cfgSaldoInicial'), state.config.saldoInicial);
     setMoneyValue(document.getElementById('cfgOrcamento'), state.config.orcamentoMensal);
     setMoneyValue(document.getElementById('cfgSaldoMinimo'), state.config.saldoMinimo);
-    document.getElementById('cfgDiarioAtivo').checked = !!state.config.diarioAtivo;
-    setMoneyValue(document.getElementById('cfgDiarioValor'), state.config.diarioValor);
   }
   bindMoney(document.getElementById('cfgSaldoInicial'), c => { state.config.saldoInicial = c; limparCache(); salvarConfig(); });
   bindMoney(document.getElementById('cfgOrcamento'), c => { state.config.orcamentoMensal = c; salvarConfig(); });
   bindMoney(document.getElementById('cfgSaldoMinimo'), c => { state.config.saldoMinimo = c; salvarConfig(); });
   bindMoney(document.getElementById('cfgSaldoReal'));
-  bindMoney(document.getElementById('cfgDiarioValor'), c => { state.config.diarioValor = c; limparCache(); salvarConfig(); });
-  document.getElementById('cfgDiarioAtivo').addEventListener('change', e => { state.config.diarioAtivo = e.target.checked; limparCache(); salvarConfig(); });
+  document.getElementById('btnIrParaDiario').addEventListener('click', () => {
+    irPara('movs');
+    periodoAtivo = 'Este mês';
+    document.querySelectorAll('#chipsPeriodo .chip').forEach(c => c.classList.toggle('active', c.dataset.p === periodoAtivo));
+    document.getElementById('filtroTipo').value = 'diario';
+    renderListaMovs();
+  });
 
   document.getElementById('btnExportarBackup').addEventListener('click', async () => {
     const backup = {
@@ -2062,17 +2143,26 @@
 
   function finalizarWizard(comExemplo){
     const anoInicial = Number(document.getElementById('wAnoInicial').value) || new Date().getFullYear();
+    const diarioValorInicial = centsFromInput(document.getElementById('wDiarioValor'));
     state.config = {
       saldoInicial: centsFromInput(document.getElementById('wSaldoInicial')),
-      diarioValor: centsFromInput(document.getElementById('wDiarioValor')),
-      diarioAtivo: true,
       orcamentoMensal: centsFromInput(document.getElementById('wOrcamento')),
       saldoMinimo: 0,
-      anoInicial
+      anoInicial,
+      diarioMigrado: true
     };
     filtro = { ano: new Date().getFullYear(), mes: new Date().getMonth() };
+    if(diarioValorInicial > 0){
+      state.movimentacoes.push({
+        id: uid(), data: todayISO(), tipo:'diario', valor: diarioValorInicial, categoria:'Outros',
+        descricao:'Gasto diário padrão', formaPagamento:'Dinheiro',
+        recorrente:false, recorrenteDiario:true, recorrenteQtdMeses:null,
+        origemRecorrenteId:null, criadoEm:new Date().toISOString()
+      });
+    }
     salvarConfig();
-    if(comExemplo){ carregarDadosExemplo(); salvarMovimentacoes(); }
+    if(comExemplo){ carregarDadosExemplo(); }
+    salvarMovimentacoes();
     document.getElementById('wizard').classList.add('hidden');
     irPara('dashboard');
   }
