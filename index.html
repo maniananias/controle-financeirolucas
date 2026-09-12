@@ -96,7 +96,7 @@
   .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
   .card{background:var(--surface);border-radius:var(--radius);padding:14px 15px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.07);}
   .card.full{grid-column:1 / -1;}
-  .card-label{font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;font-weight:500;}
+  .card-label{font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .card-valor{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;letter-spacing:-.2px;}
   .card-valor.pos{color:var(--primary);}
   .card-valor.neg{color:var(--danger);}
@@ -437,7 +437,7 @@
       </div>
       <div class="card"><p class="card-label">Entradas</p><p class="card-valor pos" id="cardEntradas">R$ 0,00</p></div>
       <div class="card"><p class="card-label">Saídas</p><p class="card-valor neg" id="cardSaidas">R$ 0,00</p></div>
-      <div class="card tap" id="cardDiarioBtn"><p class="card-label">Gastos diários ↗</p><p class="card-valor" id="cardDiario">R$ 0,00</p></div>
+      <div class="card tap" id="cardDiarioBtn"><p class="card-label">Gastos diários ✎</p><p class="card-valor" id="cardDiario">R$ 0,00</p></div>
       <div class="card"><p class="card-label">Economia acumulada</p><p class="card-valor" id="cardEconomia">R$ 0,00</p></div>
       <div class="card full"><p class="card-label">Percentual de economia</p><p class="card-valor" id="cardPctEconomia">0%</p></div>
     </div>
@@ -512,6 +512,7 @@
         <button class="extrato-range-btn" data-range="30" type="button">30 dias</button>
         <button class="extrato-range-btn" data-range="60" type="button">60 dias</button>
         <button class="extrato-range-btn" data-range="90" type="button">90 dias</button>
+        <button class="extrato-range-btn" data-range="120" type="button">120 dias</button>
       </div>
       <div id="tabelaExtrato"></div>
     </div>
@@ -634,7 +635,7 @@
     </div>
 
     <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;margin-top:10px;">🔄 Buscar atualizações</button>
-    <p class="versao-app">Versão do app: 2026-09-11-ci</p>
+    <p class="versao-app">Versão do app: 2026-09-11-cp</p>
   </section>
 
   <!-- ===== NAV INFERIOR ===== -->
@@ -975,6 +976,15 @@
     if(!state.config.diaRecebimento) return null;
     return Math.min(state.config.diaRecebimento, daysInMonth(ano, mes));
   }
+  // dia (dentro do MESMO mês) da véspera do salário. Quando o recebimento é no dia 1, a véspera
+  // é o último dia do próprio mês (não "dia 0", que não existe) — é o ponto mais apertado que cai
+  // dentro daquele mês, antes do próximo recebimento chegar.
+  function diaAntesSalario(ano, mes){
+    const diaSalario = diaSalarioConfigurado(ano, mes);
+    if(!diaSalario) return null;
+    if(diaSalario === 1) return daysInMonth(ano, mes);
+    return diaSalario - 1;
+  }
   async function salvarConfig(){ try{ await storage.set('fin-config', JSON.stringify(state.config), false); mostrarToast('Salvo'); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
   async function salvarMovimentacoes(){ try{ await storage.set('fin-movimentacoes', JSON.stringify(state.movimentacoes), false); }catch(e){ mostrarToast('Não consegui salvar agora, tenta de novo'); } }
   async function salvarOverrides(){ try{ await storage.set('fin-diario-overrides', JSON.stringify(state.diarioOverrides), false); }catch(e){} }
@@ -1302,13 +1312,11 @@
   function renderFolego(){
     const box = document.getElementById('folegoBox');
     garantirRecorrencias(filtro.ano, filtro.mes);
-    const diaSalario = diaSalarioConfigurado(filtro.ano, filtro.mes);
-    if(!diaSalario){ box.style.display = 'none'; return; }
+    const diaAnterior = diaAntesSalario(filtro.ano, filtro.mes);
+    if(!diaAnterior){ box.style.display = 'none'; return; }
     box.style.display = 'block';
 
-    const diaAnterior = diaSalario - 1;
     const nomeMes = MESES[filtro.mes] + '/' + filtro.ano;
-    if(diaAnterior < 1){ box.style.display = 'none'; return; }
 
     const dias = saldosDiariosDoMes(filtro.ano, filtro.mes);
     const saldoFolego = dias[diaAnterior-1].saldo;
@@ -1472,9 +1480,16 @@
       const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
       if(diferencaMeses < 0) continue; // antes do mês da decisão, não mostra (não tem impacto nenhum)
       const baseline = totaisDoMes(ano,mes).saldoFinal;
-      // uma parcela recorrente por mês (não acumula as anteriores); gasto único conta uma vez e persiste dali pra frente
-      let ocorrencias = 1;
-      if(recorrenteSim && qtdSim && diferencaMeses >= qtdSim) ocorrencias = 0;
+      // este saldo é ACUMULADO (o quanto você tem no total até aquele mês) — diferente do Fôlego mês a mês,
+      // aqui cada parcela paga precisa continuar contando nos meses seguintes, porque o dinheiro que já saiu
+      // não volta: gasto único conta 1x e o efeito persiste; recorrente vai empilhando 1 por mês até o limite
+      // de parcelas (se houver) e, depois que a série acaba, o total gasto fica fixo (não soma mais, mas também não desaparece)
+      let ocorrencias = 0;
+      if(recorrenteSim){
+        ocorrencias = qtdSim ? Math.min(diferencaMeses+1, qtdSim) : diferencaMeses+1;
+      }else{
+        ocorrencias = 1;
+      }
       const sinal = tipoSim==='entrada' ? 1 : -1;
       const impacto = sinal * ocorrencias * valorCents;
       resultados.push({ano, mes, baseline, simulado: baseline+impacto});
@@ -1495,10 +1510,8 @@
       const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
       const ano = d.getFullYear(), mes = d.getMonth();
       garantirRecorrencias(ano, mes);
-      const diaSalario = diaSalarioConfigurado(ano, mes);
-      if(!diaSalario) continue;
-      const diaAntes = diaSalario - 1;
-      if(diaAntes < 1) continue;
+      const diaAntes = diaAntesSalario(ano, mes);
+      if(!diaAntes) continue;
 
       const diferencaMeses = (ano-simAno)*12 + (mes-simMes);
       // antes do mês da decisão — ainda não existe, não mostra
@@ -1537,18 +1550,25 @@
 
     const folegoResultados = calcularFolegoComSimulacao(data, simTipo, valor, recorrente, qtd);
     const resumo = document.getElementById('simResumo');
-    const mesesQueApertam = folegoResultados.filter(r => r.simulado < 0);
+    // "seguro" não é só ficar positivo — é manter a reserva mínima configurada intacta.
+    // Sem saldo mínimo definido (0), o comportamento continua idêntico ao de antes (só não pode ficar negativo).
+    const limiteSeguranca = state.config.saldoMinimo || 0;
+    const mesesQueApertam = folegoResultados.filter(r => r.simulado < limiteSeguranca);
     if(folegoResultados.length === 0){
       resumo.className = 'sim-veredito';
       resumo.innerHTML = 'Ainda não consegui achar seu salário cadastrado pra calcular se isso cabe no orçamento.';
     }else if(mesesQueApertam.length === 0){
       resumo.className = 'sim-veredito pos';
-      resumo.innerHTML = '✅ <b>Sim, dá pra pagar</b> — seu saldo continua positivo em todos os meses até o salário, mesmo com essa decisão.';
+      resumo.innerHTML = limiteSeguranca > 0
+        ? '✅ <b>Sim, dá pra pagar</b> — seu saldo continua acima da reserva mínima ('+fmt(limiteSeguranca)+') em todos os meses até o salário, mesmo com essa decisão.'
+        : '✅ <b>Sim, dá pra pagar</b> — seu saldo continua positivo em todos os meses até o salário, mesmo com essa decisão.';
     }else{
       const primeiro = mesesQueApertam[0];
       const nomeMes = MESES[primeiro.mes]+'/'+primeiro.ano;
       resumo.className = 'sim-veredito neg';
-      resumo.innerHTML = '⚠️ <b>Não, isso vai apertar</b> — em '+nomeMes+' seu saldo fica negativo (<span class="valor">'+fmt(Math.abs(primeiro.simulado))+'</span> no vermelho) por causa dessa decisão.';
+      resumo.innerHTML = primeiro.simulado < 0
+        ? '⚠️ <b>Não, isso vai apertar</b> — em '+nomeMes+' seu saldo fica negativo (<span class="valor">'+fmt(Math.abs(primeiro.simulado))+'</span> no vermelho) por causa dessa decisão.'
+        : '⚠️ <b>Não, isso vai apertar</b> — em '+nomeMes+' seu saldo fica abaixo da reserva mínima de '+fmt(limiteSeguranca)+' (sobra só <span class="valor">'+fmt(primeiro.simulado)+'</span>) por causa dessa decisão.';
     }
 
     const folegoBox = document.getElementById('simFolegoBox');
@@ -1557,14 +1577,14 @@
     }else{
       folegoBox.style.display = 'block';
       document.getElementById('simFolegoLista').innerHTML = folegoResultados.map(r => {
-        const corBase = r.simulado>=0 ? 'pos' : 'neg';
-        const ficaNegativo = r.baseline>=0 && r.simulado<0;
+        const corBase = r.simulado>=limiteSeguranca ? 'pos' : 'neg';
+        const ficouInseguro = r.baseline>=limiteSeguranca && r.simulado<limiteSeguranca;
         return '<div class="folego-linha-v2">'+
           '<div class="folego-mes-header">'+MESES[r.mes]+'/'+r.ano+' <small>(dia '+r.diaAntes+')</small></div>'+
           '<div class="folego-comparativo">'+
             '<div class="folego-col"><span class="folego-rotulo">Sem decisão</span><b class="folego-valor-neutro">'+fmt(r.baseline)+'</b></div>'+
             '<span class="folego-seta">→</span>'+
-            '<div class="folego-col"><span class="folego-rotulo">Com decisão</span><b class="'+corBase+'">'+fmt(r.simulado)+(ficaNegativo?' ⚠':'')+'</b></div>'+
+            '<div class="folego-col"><span class="folego-rotulo">Com decisão</span><b class="'+corBase+'">'+fmt(r.simulado)+(ficouInseguro?' ⚠':'')+'</b></div>'+
           '</div>'+
         '</div>';
       }).join('');
@@ -1685,18 +1705,14 @@
     renderDashboard();
   });
 
-  // ---- toque no cartão "Gastos diários" abre Movimentações já filtrado ----
+  // ---- toque no cartão "Gastos diários" abre a edição rápida do diário de hoje ----
   document.getElementById('cardDiarioBtn').addEventListener('click', () => {
-    irPara('movs');
-    periodoAtivo = 'Este mês';
-    document.querySelectorAll('#chipsPeriodo .chip').forEach(c => c.classList.toggle('active', c.dataset.p === periodoAtivo));
-    document.getElementById('filtroTipo').value = 'diario';
-    renderListaMovs();
+    abrirEditorDiarioDia(todayISO());
   });
 
   // ================= MOVIMENTAÇÕES =================
-  const PERIODOS = ['Tudo','Hoje','Este mês','Último mês','Próximo mês','Este ano','Escolher mês'];
-  let periodoAtivo = 'Este mês';
+  const PERIODOS = ['Hoje','Mês passado','Mês atual','Próximo mês','Personalizado'];
+  let periodoAtivo = 'Mês atual';
   function renderMovs(){
     const anoAtual = new Date().getFullYear();
     for(let m=0; m<12; m++) garantirRecorrencias(anoAtual, m);
@@ -1710,7 +1726,7 @@
       chips.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
         periodoAtivo = c.dataset.p;
         chips.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active', x===c));
-        document.getElementById('filtroMesEspecifico').style.display = (periodoAtivo === 'Escolher mês') ? 'flex' : 'none';
+        document.getElementById('filtroMesEspecifico').style.display = (periodoAtivo === 'Personalizado') ? 'flex' : 'none';
         renderListaMovs();
       }));
     }
@@ -1724,7 +1740,7 @@
       selMes.addEventListener('change', renderListaMovs);
       selAno.addEventListener('change', renderListaMovs);
     }
-    document.getElementById('filtroMesEspecifico').style.display = (periodoAtivo === 'Escolher mês') ? 'flex' : 'none';
+    document.getElementById('filtroMesEspecifico').style.display = (periodoAtivo === 'Personalizado') ? 'flex' : 'none';
     const catSel = document.getElementById('filtroCategoria');
     if(!catSel.dataset.ready){
       catSel.innerHTML += CATEGORIAS.map(c=>'<option value="'+c+'">'+(CAT_ICONES[c]||'')+' '+c+'</option>').join('');
@@ -1736,8 +1752,8 @@
     const hoje = new Date();
     const iso = todayISO();
     if(p==='Hoje') return [iso, iso];
-    if(p==='Este mês') return [isoDate(hoje.getFullYear(),hoje.getMonth(),1), isoDate(hoje.getFullYear(),hoje.getMonth(),daysInMonth(hoje.getFullYear(),hoje.getMonth()))];
-    if(p==='Último mês'){
+    if(p==='Mês atual') return [isoDate(hoje.getFullYear(),hoje.getMonth(),1), isoDate(hoje.getFullYear(),hoje.getMonth(),daysInMonth(hoje.getFullYear(),hoje.getMonth()))];
+    if(p==='Mês passado'){
       const m = hoje.getMonth()===0 ? 11 : hoje.getMonth()-1;
       const a = hoje.getMonth()===0 ? hoje.getFullYear()-1 : hoje.getFullYear();
       return [isoDate(a,m,1), isoDate(a,m,daysInMonth(a,m))];
@@ -1747,8 +1763,7 @@
       const a = hoje.getMonth()===11 ? hoje.getFullYear()+1 : hoje.getFullYear();
       return [isoDate(a,m,1), isoDate(a,m,daysInMonth(a,m))];
     }
-    if(p==='Este ano') return [isoDate(hoje.getFullYear(),0,1), isoDate(hoje.getFullYear(),11,31)];
-    if(p==='Escolher mês'){
+    if(p==='Personalizado'){
       const m = Number(document.getElementById('filtroMes').value);
       const a = Number(document.getElementById('filtroAno').value);
       garantirRecorrencias(a, m);
@@ -1984,10 +1999,7 @@
   // acha o dia (número) da véspera do salário daquele mês, ou null se não tiver dia de recebimento configurado
   function diaFolegoDoMes(ano, mes){
     garantirRecorrencias(ano, mes);
-    const diaSalario = diaSalarioConfigurado(ano, mes);
-    if(!diaSalario) return null;
-    const diaAnterior = diaSalario - 1;
-    return diaAnterior >= 1 ? diaAnterior : null;
+    return diaAntesSalario(ano, mes);
   }
   // acha a data (iso) do próximo salário a partir de uma data de referência
   function proximoSalarioApartirDe(isoReferencia){
@@ -2106,9 +2118,12 @@
     document.getElementById('diaDiarioTitulo').textContent = 'Diário de ' + String(d).padStart(2,'0')+'/'+String(m).padStart(2,'0')+'/'+y;
     document.getElementById('diaDiarioIso').value = iso;
     const avulso = state.movimentacoes.find(mv => mv.tipo==='diario' && mv.data===iso && !mv.recorrenteDiario);
-    setMoneyValue(document.getElementById('diaDiarioValor'), avulso ? avulso.valor : diarioValorParaDia(iso));
+    const inputValor = document.getElementById('diaDiarioValor');
+    setMoneyValue(inputValor, avulso ? avulso.valor : diarioValorParaDia(iso));
     document.getElementById('btnDiaDiarioRemover').style.display = avulso ? 'inline-block' : 'none';
     document.getElementById('modalDiarioDia').classList.add('show');
+    // seleciona o valor já preenchido, pra dar pra digitar por cima na hora, sem precisar apagar primeiro
+    setTimeout(() => { inputValor.focus(); inputValor.select(); }, 50);
   }
   document.getElementById('btnDiaDiarioSalvar').addEventListener('click', async () => {
     const iso = document.getElementById('diaDiarioIso').value;
@@ -2427,7 +2442,7 @@
   bindMoney(document.getElementById('cfgSaldoReal'));
   document.getElementById('btnIrParaDiario').addEventListener('click', () => {
     irPara('movs');
-    periodoAtivo = 'Este mês';
+    periodoAtivo = 'Mês atual';
     document.querySelectorAll('#chipsPeriodo .chip').forEach(c => c.classList.toggle('active', c.dataset.p === periodoAtivo));
     document.getElementById('filtroTipo').value = 'diario';
     renderListaMovs();
