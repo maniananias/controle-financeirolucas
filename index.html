@@ -656,7 +656,7 @@
     <div class="config-section">
       <h3>ℹ️ Sobre</h3>
       <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;">🔄 Buscar atualizações</button>
-      <p class="versao-app">Versão 1.4.0</p>
+      <p class="versao-app">Versão 1.4.1</p>
     </div>
   </section>
 
@@ -1358,16 +1358,25 @@
 
     const dias = saldosDiariosDoMes(filtro.ano, filtro.mes);
     const saldoFolego = dias[diaAnterior-1].saldo;
+    const isoFolego = isoDate(filtro.ano, filtro.mes, diaAnterior);
 
     document.getElementById('folegoTitulo').textContent = 'Fôlego de ' + nomeMes + ' (véspera do salário, dia ' + diaAnterior + ')';
     const el = document.getElementById('folegoResultado');
-    if(saldoFolego >= 0){
-      el.className = 'ajuste-resultado pos';
-      el.innerHTML = 'Sobra <span class="valor">'+fmt(saldoFolego)+'</span> no dia anterior ao salário de '+nomeMes+'.';
-    }else{
-      el.className = 'ajuste-resultado neg';
-      el.innerHTML = 'Falta <span class="valor">'+fmt(Math.abs(saldoFolego))+'</span> no dia anterior ao salário de '+nomeMes+'.';
+    el.className = saldoFolego >= 0 ? 'ajuste-resultado pos' : 'ajuste-resultado neg';
+    let html = saldoFolego >= 0
+      ? 'Sobra <span class="valor">'+fmt(saldoFolego)+'</span> no dia anterior ao salário de '+nomeMes+'.'
+      : 'Falta <span class="valor">'+fmt(Math.abs(saldoFolego))+'</span> no dia anterior ao salário de '+nomeMes+'.';
+    // quanto do saldo de hoje ainda vai ser consumido até lá (só faz sentido se essa véspera ainda não passou)
+    if(isoFolego >= todayISO()){
+      const saldoHoje = saldoAteHoje();
+      const consumo = saldoHoje - saldoFolego;
+      if(consumo > 0){
+        html += '<p style="font-size:12px;color:var(--ink-soft);margin:8px 0 0;font-weight:400;">Do seu saldo de hoje (<span class="mono">'+fmt(saldoHoje)+'</span>), ainda vai sair <span class="mono" style="color:var(--danger);">'+fmt(consumo)+'</span> até lá.</p>';
+      }else if(consumo < 0){
+        html += '<p style="font-size:12px;color:var(--ink-soft);margin:8px 0 0;font-weight:400;">Seu saldo deve crescer <span class="mono" style="color:var(--primary);">'+fmt(Math.abs(consumo))+'</span> até lá, além do que você já tem hoje.</p>';
+      }
     }
+    el.innerHTML = html;
   }
 
   function renderAjusteFinanceiro(){
