@@ -656,7 +656,7 @@
     <div class="config-section">
       <h3>ℹ️ Sobre</h3>
       <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;">🔄 Buscar atualizações</button>
-      <p class="versao-app">Versão 1.4.1</p>
+      <p class="versao-app">Versão 1.4.2</p>
     </div>
   </section>
 
@@ -1366,8 +1366,11 @@
     let html = saldoFolego >= 0
       ? 'Sobra <span class="valor">'+fmt(saldoFolego)+'</span> no dia anterior ao salário de '+nomeMes+'.'
       : 'Falta <span class="valor">'+fmt(Math.abs(saldoFolego))+'</span> no dia anterior ao salário de '+nomeMes+'.';
-    // quanto do saldo de hoje ainda vai ser consumido até lá (só faz sentido se essa véspera ainda não passou)
-    if(isoFolego >= todayISO()){
+    // quanto do saldo de hoje ainda vai ser consumido até lá — só faz sentido no mês ATUAL de verdade,
+    // não em outros meses que você navegar pelo filtro (aí a comparação com "hoje" deixa de fazer sentido)
+    const hoje = new Date();
+    const estaNoMesAtual = (filtro.ano === hoje.getFullYear() && filtro.mes === hoje.getMonth());
+    if(estaNoMesAtual && isoFolego >= todayISO()){
       const saldoHoje = saldoAteHoje();
       const consumo = saldoHoje - saldoFolego;
       if(consumo > 0){
