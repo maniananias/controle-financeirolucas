@@ -43,6 +43,11 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  /* esconde a barra de rolagem visualmente (o toque/arrasto pra rolar continua funcionando normal) */
+  html{scrollbar-width:none;}
+  html::-webkit-scrollbar{display:none;}
+  body{scrollbar-width:none;}
+  body::-webkit-scrollbar{display:none;}
   html{overflow-x:hidden;background:var(--bg);}
   body.modal-aberto{position:fixed;left:0;right:0;overflow:hidden;width:100%;}
   body{
@@ -56,9 +61,7 @@
   }
   body::before{
     content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
-    background:
-      radial-gradient(560px 420px at 12% -6%, rgba(34,227,178,.16), transparent 60%),
-      radial-gradient(620px 480px at 100% 18%, rgba(108,124,255,.14), transparent 55%);
+    background:var(--bg);
   }
   h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;letter-spacing:-.2px;}
   .mono{font-family:'JetBrains Mono',monospace;}
@@ -152,6 +155,14 @@
   .folego-col b.pos{color:var(--primary);}
   .folego-col b.neg{color:var(--danger);}
   .folego-valor-neutro{color:var(--ink-soft);}
+  .ferias-aviso{font-size:12px;color:var(--danger);margin:-6px 0 12px;line-height:1.4;}
+  .ferias-dica{font-size:11.5px;color:var(--ink-soft);opacity:.75;margin:-8px 0 12px;line-height:1.4;}
+  .ferias-resultado-linha{border-radius:12px;padding:10px 12px;margin-top:10px;}
+  .ferias-resultado-exato{background:rgba(34,227,178,.08);border:1px solid rgba(34,227,178,.3);}
+  .ferias-resultado-estimativa{background:rgba(255,180,73,.08);border:1px solid rgba(255,180,73,.3);}
+  .ferias-resultado-tag{display:block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+  .ferias-resultado-exato .ferias-resultado-tag{color:var(--primary);}
+  .ferias-resultado-estimativa .ferias-resultado-tag{color:var(--gold);}
   .btn-simular-destaque{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,180,73,.35);background:var(--gold-soft);color:var(--gold);font-weight:600;font-size:13.5px;font-family:inherit;cursor:pointer;margin-bottom:16px;}
   .sim-intro{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 16px;}
 
@@ -224,13 +235,13 @@
   .rel-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right, black calc(100% - 28px), transparent 100%);mask-image:linear-gradient(to right, black calc(100% - 28px), transparent 100%);}
   .rel-tabs::-webkit-scrollbar{display:none;}
   .rel-tab{flex:0 0 auto;padding:7px 12px;border-radius:20px;background:var(--surface);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
-  .rel-tab.active{background:var(--gradient-primary);color:#fff;border-color:transparent;}
+  .rel-tab.active{background:var(--primary);color:var(--bg);font-weight:700;border-color:transparent;}
   .rel-view{display:none;}
   .rel-view.active{display:block;}
   .extrato-range-tabs{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
   .extrato-range-tabs::-webkit-scrollbar{display:none;}
   .extrato-range-btn{flex:0 0 auto;padding:7px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:color .15s,border-color .15s;}
-  .extrato-range-btn.active{background:var(--gradient-primary);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(34,227,178,.22);}
+  .extrato-range-btn.active{background:var(--primary);color:var(--bg);font-weight:700;border-color:transparent;box-shadow:0 4px 14px rgba(34,227,178,.22);}
   .extrato-range-tabs-passado{margin-top:-6px;}
   .extrato-range-label{flex:0 0 auto;font-size:11px;color:var(--ink-soft);opacity:.65;align-self:center;padding-right:2px;}
   .extrato-dia{background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid rgba(255,255,255,.07);}
@@ -264,6 +275,8 @@
   .extrato-col-dia{text-align:center;font-weight:700;color:var(--ink-soft);}
   .extrato-col-dia small{display:block;margin-top:2px;font-weight:500;opacity:.55;text-transform:lowercase;font-size:8.5px;}
   .extrato-entrada{background:rgba(34,227,178,.10);color:#22E3B2;font-weight:700;border-radius:6px;cursor:pointer;}
+  .extrato-entrada-ferias{background:rgba(63,208,224,.16);color:#3FD0E0;}
+  .extrato-ferias-tag{display:block;font-size:8.5px;font-weight:600;opacity:.85;margin-top:1px;white-space:nowrap;}
   .extrato-saida{background:rgba(255,107,133,.11);color:#FF6B85;font-weight:700;border-radius:6px;cursor:pointer;}
   .extrato-diario{color:#8C9BFF;cursor:pointer;transition:background .15s;border-radius:6px;}
   .extrato-diario-com-valor{background:rgba(140,155,255,.11);font-weight:700;}
@@ -271,9 +284,11 @@
   .extrato-zerar{font-size:9.5px;opacity:.4;font-style:italic;color:var(--ink-soft);}
   .extrato-saldo{font-weight:800;background:rgba(255,193,90,.09);color:#FFC15A;}
   .extrato-saldo.neg{background:rgba(255,107,133,.15);color:#FF6B85;}
-  tr.extrato-linha-hoje{background:rgba(124,140,255,.07);}
-  tr.extrato-linha-hoje td{box-shadow:inset 0 1px 0 rgba(124,140,255,.4),inset 0 -1px 0 rgba(124,140,255,.4);}
-  tr.extrato-linha-hoje td:first-child{box-shadow:inset 0 1px 0 rgba(124,140,255,.4),inset 0 -1px 0 rgba(124,140,255,.4),inset 3px 0 0 rgba(124,140,255,.6);}
+  tr.extrato-linha-hoje{background:rgba(124,140,255,.13);}
+  tr.extrato-linha-hoje td{box-shadow:inset 0 1px 0 rgba(124,140,255,.55),inset 0 -1px 0 rgba(124,140,255,.55);font-weight:700;}
+  tr.extrato-linha-hoje td:first-child{box-shadow:inset 0 1px 0 rgba(124,140,255,.55),inset 0 -1px 0 rgba(124,140,255,.55),inset 4px 0 0 rgba(124,140,255,.85);}
+  tr.extrato-linha-fimdesemana td:first-child{color:var(--gold);opacity:.85;}
+  tr.extrato-linha-mes td{padding:7px 10px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);background:var(--surface-alt);border-bottom:1px solid rgba(255,255,255,.08);}
   tr.extrato-linha-folego .extrato-saldo{background:rgba(34,227,178,.22);color:#22E3B2;}
   tr.extrato-linha-folego .extrato-saldo.neg{background:rgba(255,107,133,.16);color:#FF6B85;}
   .extrato-legenda{font-size:10.5px;color:var(--ink-soft);opacity:.75;margin:10px 2px 0;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.6;}
@@ -399,7 +414,7 @@
   @keyframes slideInDrawer{ from{ transform:translateX(-100%); } to{ transform:translateX(0); } }
   .modal-menu-topo{align-items:stretch;justify-content:flex-start;padding:0;}
   .modal-menu-topo .modal-sheet{
-    width:78%;max-width:320px;height:100%;border-radius:0 20px 20px 0;
+    width:78%;max-width:320px;height:100%;max-height:none;border-radius:0 20px 20px 0;
     padding-top:calc(20px + env(safe-area-inset-top));
     box-shadow:8px 0 32px rgba(0,0,0,.4);
     animation:slideInDrawer .24s ease;
@@ -435,7 +450,7 @@
   <!-- ===== VISÃO GERAL ===== -->
   <section class="screen active" id="screen-dashboard">
     <div class="topbar">
-      <div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">🏠</span></button><h1>Visão geral</h1></div>
+      <div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Visão geral</h1></div>
       <div class="periodo">
         <button id="btnHoje" class="btn-hoje" type="button" title="Voltar para hoje">Hoje</button>
         <select id="dashDia"></select>
@@ -496,7 +511,7 @@
 
   <!-- ===== MOVIMENTAÇÕES ===== -->
   <section class="screen" id="screen-movs">
-    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">💰</span></button><h1>Movimentações</h1></div></div>
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Movimentações</h1></div></div>
     <p class="hoje-hint" id="hojeHint"></p>
     <div class="search-row"><input type="text" id="buscaMov" placeholder="Buscar por categoria ou descrição"></div>
     <div class="chips" id="chipsPeriodo"></div>
@@ -513,13 +528,13 @@
 
   <!-- ===== RELATÓRIOS ===== -->
   <section class="screen" id="screen-relatorios">
-    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">📊</span></button><h1>Relatórios</h1></div></div>
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Relatórios</h1></div></div>
     <div class="rel-tabs">
-      <div class="rel-tab active" data-rel="extrato">Extrato</div>
-      <div class="rel-tab" data-rel="fechamento">Fechamento</div>
-      <div class="rel-tab" data-rel="categorias">Categorias</div>
-      <div class="rel-tab" data-rel="evolucao">Evolução</div>
-      <div class="rel-tab" data-rel="comparacao">Comparar</div>
+      <div class="rel-tab active" data-rel="extrato">📋 Extrato</div>
+      <div class="rel-tab" data-rel="fechamento">📅 Fechamento</div>
+      <div class="rel-tab" data-rel="categorias">🏷️ Categorias</div>
+      <div class="rel-tab" data-rel="evolucao">📈 Evolução</div>
+      <div class="rel-tab" data-rel="comparacao">⚖️ Comparar</div>
     </div>
 
     <div class="rel-view active" id="rel-extrato">
@@ -578,19 +593,15 @@
 
   <!-- ===== METAS ===== -->
   <section class="screen" id="screen-metas">
-    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">🎯</span></button><h1>Metas financeiras</h1></div><button class="btn-secundario" id="btnNovaMeta" style="flex:none;">+ Meta</button></div>
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Metas financeiras</h1></div><button class="btn-secundario" id="btnNovaMeta" style="flex:none;">+ Meta</button></div>
     <div id="listaMetas"></div>
   </section>
 
   <!-- ===== SIMULAÇÃO ===== -->
   <section class="screen" id="screen-simulacao">
-    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">🔮</span></button><h1>Simular decisão</h1></div><button class="btn-fechar-tela" id="btnFecharSimulacao" type="button">✕ Fechar</button></div>
-    <p class="sim-intro">Antes de gastar (ou receber) alguma coisa, teste aqui o impacto real nos próximos 12 meses. Nada é lançado até você confirmar.</p>
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Simular decisão</h1></div><button class="btn-fechar-tela" id="btnFecharSimulacao" type="button">✕ Fechar</button></div>
+    <p class="sim-intro">Antes de gastar alguma coisa, teste aqui o impacto real nos próximos 12 meses. Nada é lançado até você confirmar.</p>
 
-    <div class="tipo-toggle">
-      <button type="button" id="simBtnEntrada">↑ Entrada</button>
-      <button type="button" id="simBtnSaida">↓ Saída</button>
-    </div>
     <div class="field"><label>Valor</label><input id="simValor" inputmode="numeric" placeholder="R$ 0,00"></div>
     <div class="field"><label>Data</label><input type="date" id="simData"></div>
     <div class="field"><label>Categoria</label><select id="simCategoria"></select></div>
@@ -616,9 +627,72 @@
     </div>
   </section>
 
+  <!-- ===== CALCULADORA DE FÉRIAS ===== -->
+  <section class="screen" id="screen-ferias">
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">🏖️</span></button><h1>Férias</h1></div><button class="btn-fechar-tela" id="btnFecharFerias" type="button">✕ Fechar</button></div>
+    <p class="sim-intro">Calcule quanto você recebe de férias, seguindo a regra da CLT (salário do período + 1/3 constitucional). Nada é lançado até você confirmar.</p>
+
+    <div class="tipo-toggle">
+      <button type="button" id="feriasBtnIntegral">30 dias inteiros</button>
+      <button type="button" id="feriasBtnParcial">Tirar parte + vender parte</button>
+    </div>
+
+    <div class="field"><label>Seu salário mensal</label><input id="feriasSalario" inputmode="numeric" placeholder="R$ 0,00"></div>
+
+    <div class="field"><label>Data que vai tirar as férias</label><input type="date" id="feriasDataInicio"></div>
+
+    <div id="feriasCampoDias" class="field"><label>Quantidade de dias</label><input type="number" id="feriasDiasTirados" inputmode="numeric" min="1" max="30" placeholder="Ex: 20"></div>
+
+    <div id="feriasCamposParcial" style="display:none;">
+      <div class="field"><label>Dias que vai vender (abono, máximo 10)</label><input type="number" id="feriasDiasVendidos" inputmode="numeric" min="0" max="10" placeholder="Ex: 10"></div>
+      <p class="ferias-dica">Não vai vender dias? Deixa em branco ou 0.</p>
+      <p id="feriasAvisoDias" class="ferias-aviso" style="display:none;"></p>
+    </div>
+
+    <div class="field"><label>Data que espera receber</label><input type="date" id="feriasData"></div>
+
+    <div class="field"><label>Desconto estimado (INSS + IR, opcional)</label><input id="feriasDesconto" inputmode="numeric" placeholder="R$ 0,00"></div>
+    <p class="ferias-dica">Não sabe o valor? Deixa em branco. O app não tenta adivinhar isso, essas tabelas são complexas e mudam com frequência. Se já tirou férias antes, dá pra olhar no seu holerite anterior quanto foi descontado.</p>
+
+    <div class="ajuste-box" id="feriasResultadoBox" style="display:none;">
+      <p class="ajuste-titulo">Valor calculado</p>
+      <div id="feriasDetalhamento"></div>
+      <div class="ferias-resultado-linha ferias-resultado-exato">
+        <span class="ferias-resultado-tag">✅ EXATO · calculado pela lei</span>
+        <div id="feriasTotalBrutoLinha"></div>
+      </div>
+      <div class="ferias-resultado-linha ferias-resultado-estimativa" id="feriasLinhaLiquido" style="display:none;">
+        <span class="ferias-resultado-tag">🧮 ESTIMATIVA · depende do desconto que você informou</span>
+        <div id="feriasTotalLiquidoLinha"></div>
+      </div>
+    </div>
+
+    <div class="ajuste-box" id="feriasImpactoBox" style="display:none;">
+      <p class="ajuste-titulo">💡 Isso pode afetar seu salário normal em</p>
+      <div id="feriasImpactoLista"></div>
+      <p class="ferias-dica" style="margin:10px 0 0;">Estimativa de referência (salário ÷ 30 × dias trabalhados naquele mês). Cada empresa processa a folha de um jeito. Use como ponto de partida e ajuste o lançamento do salário desse mês manualmente, se precisar.</p>
+    </div>
+
+    <div class="ajuste-box" id="feriasOrcamentoBox" style="display:none;">
+      <p class="ajuste-titulo">💰 Quanto você pode gastar nessas férias sem apertar depois</p>
+      <p class="ferias-dica" style="margin:0 0 10px;">Nesses dias você não vai ter o gasto diário normal. Esse valor liberado soma com o seu Fôlego do mês em que você volta, dando uma folga extra pra passeio, restaurante etc.</p>
+      <div class="ferias-resultado-linha ferias-resultado-exato">
+        <span class="ferias-resultado-tag">Sem considerar reserva mínima</span>
+        <div id="feriasOrcamentoBrutoLinha"></div>
+      </div>
+      <div class="ferias-resultado-linha ferias-resultado-estimativa" id="feriasOrcamentoSeguroBox" style="display:none;">
+        <span class="ferias-resultado-tag">Respeitando sua reserva mínima configurada</span>
+        <div id="feriasOrcamentoSeguroLinha"></div>
+      </div>
+    </div>
+
+    <button class="btn-primario" id="btnCalcularFerias" style="width:100%;margin:6px 0 12px;">Calcular</button>
+    <button class="btn-secundario" id="btnLancarFerias" style="width:100%;display:none;">Lançar como Entrada</button>
+  </section>
+
   <!-- ===== CONFIGURAÇÕES ===== -->
   <section class="screen" id="screen-config">
-    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">⚙️</span></button><h1>Configurações</h1></div></div>
+    <div class="topbar"><div class="topbar-titulo"><button class="btn-menu-topo" type="button"><span class="icone-pagina-atual">☰</span></button><h1>Configurações</h1></div></div>
 
     <div class="config-section">
       <h3>📊 Perfil financeiro</h3>
@@ -634,7 +708,7 @@
       <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">Se o saldo atual do app não bate com o que você tem de verdade na conta hoje, digite o valor real aqui. O app cria um ajuste automático na data de hoje. Nada do seu histórico anterior é alterado.</p>
       <div class="field"><label>Qual é o seu saldo real hoje?</label><input id="cfgSaldoReal" inputmode="numeric" placeholder="R$ 0,00"></div>
       <button class="btn-secundario" id="btnRecalibrarSaldo" style="width:100%;margin-bottom:16px;">Recalibrar</button>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">Esse é o valor que se repete sozinho todo dia, a partir de hoje, até você trocar de novo. Dias passados não mudam — só quer ajustar um dia específico? Use o Extrato.</p>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;">Esse é o valor que se repete sozinho todo dia, a partir de hoje, até você trocar de novo. Dias passados não mudam. Só quer ajustar um dia específico? Use o Extrato.</p>
       <div class="field"><label>Gasto diário padrão</label>
         <div class="valor-soma-row">
           <input id="cfgDiarioValor" inputmode="numeric" placeholder="R$ 0,00">
@@ -656,7 +730,7 @@
     <div class="config-section">
       <h3>ℹ️ Sobre</h3>
       <button class="btn-secundario" id="btnAtualizarApp" style="width:100%;">🔄 Buscar atualizações</button>
-      <p class="versao-app">Versão 1.4.2</p>
+      <p class="versao-app">Versão 1.9.1</p>
     </div>
   </section>
 
@@ -688,6 +762,7 @@
         <button class="mais-item" data-screen="relatorios"><span class="mais-ico">📊</span>Relatórios</button>
         <button class="mais-item" data-screen="metas"><span class="mais-ico">🎯</span>Metas financeiras</button>
         <button class="mais-item" data-screen="simulacao"><span class="mais-ico">🔮</span>Simular uma decisão</button>
+        <button class="mais-item" data-screen="ferias"><span class="mais-ico">🏖️</span>Calcular férias</button>
         <button class="mais-item" data-screen="config"><span class="mais-ico">⚙️</span>Configurações</button>
       </div>
     </div>
@@ -847,17 +922,17 @@
 <script>
 (function(){
   // ================= constantes =================
-  const CATEGORIAS = ['Salário','Alimentação','Transporte','Moradia','Contas','Lazer','Saúde','Compras','Educação','Outros'];
+  const CATEGORIAS = ['Salário','Férias','Alimentação','Transporte','Moradia','Contas','Lazer','Saúde','Compras','Educação','Outros'];
   const FORMAS = ['Dinheiro','Pix','Débito','Crédito','Transferência','Outros'];
   const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const CAT_CORES = {
-    'Salário':'#22E3B2','Alimentação':'#FF9F5A','Transporte':'#6C7CFF','Moradia':'#B98CFF',
+    'Salário':'#22E3B2','Férias':'#3FD0E0','Alimentação':'#FF9F5A','Transporte':'#6C7CFF','Moradia':'#B98CFF',
     'Contas':'#8CA0BE','Lazer':'#FF6FB1','Saúde':'#FF6B85','Compras':'#FFB449',
     'Educação':'#3FD0E0','Outros':'#7A8AA0','Gasto Diário':'#5C6B80'
   };
   const CAT_ICONES = {
-    'Salário':'💼','Alimentação':'🍔','Transporte':'🚗','Moradia':'🏠',
+    'Salário':'💼','Férias':'🏖️','Alimentação':'🍔','Transporte':'🚗','Moradia':'🏠',
     'Contas':'🧾','Lazer':'🎮','Saúde':'💊','Compras':'🛍️',
     'Educação':'📚','Outros':'🔖','Gasto Diário':'🔁'
   };
@@ -1171,6 +1246,39 @@
     if(state.config.saldoMinimo && atual.saldoFinal < state.config.saldoMinimo){
       alerts.push({tipo:'alerta-forte', texto:'Seu saldo está abaixo do valor mínimo definido.'});
     }
+    const prefixoMes = ano+'-'+pad(mes+1)+'-';
+    const impactoDoMes = [];
+    state.movimentacoes.forEach(m => {
+      if(m.tipo==='entrada' && m.categoria==='Férias' && Array.isArray(m.feriasImpacto)){
+        const achou = m.feriasImpacto.find(x => x.ano===ano && x.mes===mes);
+        if(achou) impactoDoMes.push(achou);
+      }
+    });
+    if(impactoDoMes.length > 0){
+      const totalEstimado = impactoDoMes.reduce((a,x)=>a+x.estimativa,0);
+      alerts.push({tipo:'atencao', texto:'Você tirou férias que afetam este mês. Seu salário normal pode vir por volta de '+fmt(totalEstimado)+' (estimativa). Confira e ajuste o lançamento se precisar.'});
+    }else{
+      const temFeriasNoMes = state.movimentacoes.some(m => m.tipo==='entrada' && m.categoria==='Férias' && m.data.startsWith(prefixoMes));
+      if(temFeriasNoMes){
+        alerts.push({tipo:'atencao', texto:'Você lançou férias este mês. Se o salário normal vier diferente por causa disso, lembre de ajustar o lançamento dele também.'});
+      }
+    }
+    // se o mês filtrado toca o período de férias em si (não só o pagamento), avisa quanto dá pra gastar
+    state.movimentacoes.forEach(m => {
+      if(m.tipo!=='entrada' || m.categoria!=='Férias' || !m.feriasInicio || !m.feriasDias) return;
+      const fimFerias = addDiasISO(m.feriasInicio, m.feriasDias-1);
+      const ini = parseISO(m.feriasInicio), fim = parseISO(fimFerias);
+      const tocaMes = (ano>ini.ano || (ano===ini.ano && mes>=ini.mes)) && (ano<fim.ano || (ano===fim.ano && mes<=fim.mes));
+      if(!tocaMes) return;
+      const orc = calcularOrcamentoFerias(m.feriasInicio, m.feriasDias, m.valor, m.data, m.feriasImpacto);
+      if(orc){
+        let texto = 'Você tem férias nesse período. Dá pra gastar até '+fmt(orc.bruto)+' sem apertar quando voltar.';
+        if(orc.saldoMinimo > 0 && orc.seguro !== orc.bruto){
+          texto += ' Respeitando sua reserva mínima configurada, o valor seguro é '+fmt(orc.seguro)+'.';
+        }
+        alerts.push({tipo:'positivo', texto});
+      }
+    });
     return alerts;
   }
 
@@ -1241,9 +1349,7 @@
   new MutationObserver(atualizarTravaFundo).observe(document.body, { attributes:true, attributeFilter:['class'], subtree:true });
 
   // ================= navegação =================
-  const NOMES_TELA = { dashboard:'Visão geral', movs:'Movimentações', relatorios:'Relatórios', metas:'Metas', config:'Configurações', simulacao:'Simular decisão' };
-  const ICONES_TELA = { dashboard:'🏠', movs:'💰', relatorios:'📊', metas:'🎯', config:'⚙️', simulacao:'🔮' };
-  const SCREEN_ORDER = ['dashboard','movs','relatorios','metas','simulacao','config'];
+  const SCREEN_ORDER = ['dashboard','movs','relatorios','metas','simulacao','ferias','config'];
   const TELAS_COM_BOTAO_NOVA = ['movs','metas'];
   const TELAS_COM_BOTAO_DIARIO = ['dashboard'];
   function irPara(tela){
@@ -1256,7 +1362,7 @@
     novoEl.classList.add('active');
     if(direcao===1) novoEl.classList.add('slide-in-right');
     else if(direcao===-1) novoEl.classList.add('slide-in-left');
-    document.querySelectorAll('.icone-pagina-atual').forEach(el => el.textContent = ICONES_TELA[tela] || '☰');
+    document.querySelectorAll('.icone-pagina-atual').forEach(el => el.textContent = '☰');
     const mostraNova = TELAS_COM_BOTAO_NOVA.includes(tela);
     const mostraDiario = TELAS_COM_BOTAO_DIARIO.includes(tela);
     document.getElementById('fabNovaMov').style.display = mostraNova ? 'flex' : 'none';
@@ -1268,9 +1374,11 @@
     if(tela === 'metas') renderMetas();
     if(tela === 'config') renderConfig();
     if(tela === 'simulacao') renderSimulacaoTela();
+    if(tela === 'ferias') renderFeriasTela();
   }
   document.getElementById('btnAtalhoSimular').addEventListener('click', () => irPara('simulacao'));
   document.getElementById('btnFecharSimulacao').addEventListener('click', () => irPara('dashboard'));
+  document.getElementById('btnFecharFerias').addEventListener('click', () => irPara('dashboard'));
   function abrirMenuPrincipal(){
     const atual = document.querySelector('.screen.active').id.replace('screen-','');
     document.querySelectorAll('.mais-item').forEach(b => b.classList.toggle('mais-item-atual', b.dataset.screen === atual));
@@ -1497,7 +1605,7 @@
   document.getElementById('chartComparativoBox').addEventListener('click', () => abrirGraficoExpandido('comparativo'));
 
   // ================= SIMULAÇÃO =================
-  let simTipo = 'saida';
+  const simTipo = 'saida'; // a Simulação só testa gastos (saída) agora, entrada foi removida
   let chartSimulacao;
   let ultimaSimulacao = null;
 
@@ -1505,18 +1613,211 @@
     document.getElementById('simCategoria').innerHTML = CATEGORIAS.map(c=>'<option value="'+c+'">'+(CAT_ICONES[c]||'')+' '+c+'</option>').join('');
     document.getElementById('simData').value = todayISO();
     document.getElementById('resultadoSimulacao').style.display = 'none';
-    setSimTipo('saida');
   }
-  function setSimTipo(tipo){
-    simTipo = tipo;
-    document.getElementById('simBtnEntrada').className = tipo==='entrada' ? 'active-entrada' : '';
-    document.getElementById('simBtnSaida').className = tipo==='saida' ? 'active-saida' : '';
-  }
-  document.getElementById('simBtnEntrada').addEventListener('click', () => setSimTipo('entrada'));
-  document.getElementById('simBtnSaida').addEventListener('click', () => setSimTipo('saida'));
   bindMoney(document.getElementById('simValor'));
   document.getElementById('simRecorrente').addEventListener('change', (e) => {
     document.getElementById('simCampoQtd').style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  // ================= CALCULADORA DE FÉRIAS =================
+  function valorSalarioAtual(){
+    const origens = state.movimentacoes.filter(m => m.tipo==='entrada' && m.categoria==='Salário' && (m.recorrente || m.origemRecorrenteId));
+    if(origens.length === 0) return 0;
+    origens.sort((a,b) => b.data.localeCompare(a.data));
+    return origens[0].valor;
+  }
+  // regra da CLT: valor do período (proporcional aos dias) + 1/3 constitucional sobre esse valor.
+  // no modo integral, os "30 dias" equivalem a 1 salário cheio. No modo parcial, dias tirados e dias
+  // vendidos (abono, máximo 10 por lei) são calculados separadamente, cada um com seu próprio 1/3.
+  function calcularFerias(salarioCents, modo, diasTirados, diasVendidos){
+    if(modo === 'integral'){
+      const valorTirados = salarioCents;
+      const tercoTirados = Math.round(valorTirados/3);
+      return { valorTirados, tercoTirados, valorVendidos:0, tercoVendidos:0, total: valorTirados+tercoTirados };
+    }
+    const diario = salarioCents/30;
+    const valorTirados = Math.round(diario*diasTirados);
+    const tercoTirados = Math.round(valorTirados/3);
+    const valorVendidos = Math.round(diario*diasVendidos);
+    const tercoVendidos = Math.round(valorVendidos/3);
+    return { valorTirados, tercoTirados, valorVendidos, tercoVendidos, total: valorTirados+tercoTirados+valorVendidos+tercoVendidos };
+  }
+  // estima, pra cada mês civil tocado pelas férias, quantos dias sobraram trabalhados e o salário proporcional
+  // (é uma ESTIMATIVA de referência pra você ajustar o lançamento do salário normal daquele mês manualmente —
+  // cada empresa processa a folha de um jeito, então isso não é garantido, é só um número de partida)
+  function estimarSalariosAfetados(salarioCents, dataInicio, diasTirados){
+    const porMes = {};
+    let cursor = dataInicio;
+    for(let i=0; i<diasTirados; i++){
+      const p = parseISO(cursor);
+      const chave = p.ano+'-'+p.mes;
+      porMes[chave] = (porMes[chave]||0) + 1;
+      cursor = addDiasISO(cursor, 1);
+    }
+    return Object.keys(porMes).map(chave => {
+      const [ano, mes] = chave.split('-').map(Number);
+      const diasFerias = porMes[chave];
+      const diasTrabalhados = Math.max(0, 30 - diasFerias);
+      const estimativa = Math.round(salarioCents/30 * diasTrabalhados);
+      return { ano, mes, diasFerias, diasTrabalhados, estimativa };
+    }).sort((a,b) => (a.ano-b.ano) || (a.mes-b.mes));
+  }
+  // quanto dá pra gastar nessas férias (lazer, viagem, restaurante) sem prejudicar o mês em que você volta:
+  // Fôlego do mês de retorno + o quanto você deixa de gastar de diário nos dias de férias.
+  // A versão "segura" ainda reserva o Saldo mínimo configurado (se houver) antes de somar essa folga.
+  // valorPagamento/dataPagamento: opcional — o valor das férias que vai (ou já foi) lançado, pra já contar com
+  // esse dinheiro no Fôlego do retorno mesmo ANTES de você confirmar o lançamento (senão o cálculo fica mais
+  // apertado do que vai ser de verdade, já que esse dinheiro entra bem antes da véspera do salário do retorno).
+  // impactoSalarios: opcional — a lista de {ano,mes,estimativa} de estimarSalariosAfetados(). Enquanto você não
+  // editar manualmente o lançamento do salário reduzido daquele mês, o valor gravado continua "cheio" e infla
+  // o Fôlego do retorno por engano — aqui a gente desconta essa diferença, pra não somar dinheiro que não existe.
+  function calcularOrcamentoFerias(dataInicio, diasTirados, valorPagamento, dataPagamento, impactoSalarios){
+    const dataRetorno = addDiasISO(dataInicio, diasTirados);
+    const p = parseISO(dataRetorno);
+    garantirRecorrencias(p.ano, p.mes);
+    const diaAntes = diaAntesSalario(p.ano, p.mes);
+    if(!diaAntes) return null;
+    const isoCheckpoint = isoDate(p.ano, p.mes, diaAntes);
+    const dias = saldosDiariosDoMes(p.ano, p.mes);
+    let folegoRetorno = dias[diaAntes-1].saldo;
+    if(valorPagamento && dataPagamento && dataPagamento <= isoCheckpoint){
+      // só soma se ainda não estiver realmente lançado (senão contaria esse dinheiro duas vezes)
+      const jaLancado = state.movimentacoes.some(m => m.tipo==='entrada' && m.categoria==='Férias' && m.data===dataPagamento && m.feriasInicio===dataInicio);
+      if(!jaLancado) folegoRetorno += valorPagamento;
+    }
+    if(Array.isArray(impactoSalarios)){
+      impactoSalarios.forEach(imp => {
+        const prefixo = imp.ano+'-'+pad(imp.mes+1)+'-';
+        const salarioGravado = state.movimentacoes.find(m => m.tipo==='entrada' && m.categoria==='Salário' && m.data.startsWith(prefixo));
+        if(salarioGravado && salarioGravado.data <= isoCheckpoint && salarioGravado.valor > imp.estimativa){
+          folegoRetorno -= (salarioGravado.valor - imp.estimativa);
+        }
+      });
+    }
+    const diarioLiberado = diasTirados * valorDiarioPadraoAtual();
+    const saldoMinimo = state.config.saldoMinimo || 0;
+    const bruto = folegoRetorno + diarioLiberado;
+    const seguro = Math.max(0, folegoRetorno - saldoMinimo) + diarioLiberado;
+    return { dataRetorno, ano:p.ano, mes:p.mes, diaAntes, folegoRetorno, diarioLiberado, saldoMinimo, bruto, seguro };
+  }
+  let feriasModo = 'integral';
+  let ultimoCalculoFerias = null;
+  function renderFeriasTela(){
+    document.getElementById('feriasData').value = todayISO();
+    document.getElementById('feriasDataInicio').value = todayISO();
+    document.getElementById('feriasDiasTirados').value = '';
+    document.getElementById('feriasDesconto').value = '';
+    setMoneyValue(document.getElementById('feriasSalario'), valorSalarioAtual());
+    ultimoCalculoFerias = null;
+    setFeriasModo('integral');
+  }
+  function setFeriasModo(modo){
+    feriasModo = modo;
+    document.getElementById('feriasBtnIntegral').className = modo==='integral' ? 'active-entrada' : '';
+    document.getElementById('feriasBtnParcial').className = modo==='parcial' ? 'active-saida' : '';
+    document.getElementById('feriasCampoDias').style.display = modo==='parcial' ? 'block' : 'none';
+    document.getElementById('feriasCamposParcial').style.display = modo==='parcial' ? 'block' : 'none';
+    document.getElementById('feriasAvisoDias').style.display = 'none';
+    document.getElementById('feriasResultadoBox').style.display = 'none';
+    document.getElementById('feriasImpactoBox').style.display = 'none';
+    document.getElementById('feriasOrcamentoBox').style.display = 'none';
+    document.getElementById('btnLancarFerias').style.display = 'none';
+  }
+  document.getElementById('feriasBtnIntegral').addEventListener('click', () => setFeriasModo('integral'));
+  document.getElementById('feriasBtnParcial').addEventListener('click', () => setFeriasModo('parcial'));
+  bindMoney(document.getElementById('feriasSalario'));
+  bindMoney(document.getElementById('feriasDesconto'));
+  document.getElementById('btnCalcularFerias').addEventListener('click', () => {
+    const salario = centsFromInput(document.getElementById('feriasSalario'));
+    const aviso = document.getElementById('feriasAvisoDias');
+    aviso.style.display = 'none';
+    if(salario <= 0){ mostrarToast('Informe seu salário'); return; }
+    const dataInicio = document.getElementById('feriasDataInicio').value;
+    if(!dataInicio){ mostrarToast('Informe a data que vai tirar as férias'); return; }
+    let diasTirados = 30, diasVendidos = 0;
+    if(feriasModo === 'parcial'){
+      diasTirados = Number(document.getElementById('feriasDiasTirados').value) || 0;
+      diasVendidos = Number(document.getElementById('feriasDiasVendidos').value) || 0;
+      if(diasVendidos > 10){
+        aviso.textContent = 'Por lei, só é permitido vender até 10 dias (1/3 de 30).';
+        aviso.style.display = 'block';
+        return;
+      }
+      if(diasTirados <= 0 || diasTirados + diasVendidos > 30){
+        aviso.textContent = 'A soma dos dias tirados e vendidos não pode passar de 30.';
+        aviso.style.display = 'block';
+        return;
+      }
+    }
+    const data = document.getElementById('feriasData').value || todayISO();
+    const desconto = centsFromInput(document.getElementById('feriasDesconto'));
+    const r = calcularFerias(salario, feriasModo, diasTirados, diasVendidos);
+    const liquido = Math.max(0, r.total - desconto);
+    const impacto = estimarSalariosAfetados(salario, dataInicio, diasTirados);
+    ultimoCalculoFerias = Object.assign({ salario, modo:feriasModo, dataInicio, diasTirados, diasVendidos, data, desconto, liquido, impacto }, r);
+
+    let detalhes = '<div class="ajuste-linhas"><div><span>'+(feriasModo==='integral'?'Salário (30 dias)':'Dias tirados ('+diasTirados+')')+'</span><b class="mono pos">'+fmt(r.valorTirados)+'</b></div>'+
+      '<div><span>1/3 constitucional</span><b class="mono pos">'+fmt(r.tercoTirados)+'</b></div></div>';
+    if(feriasModo === 'parcial' && diasVendidos > 0){
+      detalhes += '<div class="ajuste-linhas"><div><span>Abono ('+diasVendidos+' dias vendidos)</span><b class="mono pos">'+fmt(r.valorVendidos)+'</b></div>'+
+        '<div><span>1/3 do abono</span><b class="mono pos">'+fmt(r.tercoVendidos)+'</b></div></div>';
+    }
+    document.getElementById('feriasDetalhamento').innerHTML = detalhes;
+    document.getElementById('feriasTotalBrutoLinha').innerHTML = 'Valor bruto: <b class="mono">'+fmt(r.total)+'</b>';
+    const linhaLiquido = document.getElementById('feriasLinhaLiquido');
+    if(desconto > 0){
+      document.getElementById('feriasTotalLiquidoLinha').innerHTML = 'Valor líquido (bruto − '+fmt(desconto)+' de desconto): <b class="mono">'+fmt(liquido)+'</b>';
+      linhaLiquido.style.display = 'block';
+    }else{
+      linhaLiquido.style.display = 'none';
+    }
+    document.getElementById('feriasResultadoBox').style.display = 'block';
+
+    const impactoBox = document.getElementById('feriasImpactoBox');
+    const temImpacto = impacto.some(x => x.diasTrabalhados > 0);
+    if(temImpacto){
+      document.getElementById('feriasImpactoLista').innerHTML = impacto.filter(x => x.diasTrabalhados > 0).map(x =>
+        '<div class="ajuste-linhas"><div><span>'+MESES[x.mes]+'/'+x.ano+' ('+x.diasTrabalhados+' dias trabalhados)</span><b class="mono pos">'+fmt(x.estimativa)+'</b></div></div>'
+      ).join('');
+      impactoBox.style.display = 'block';
+    }else{
+      impactoBox.style.display = 'none';
+    }
+
+    const orcamentoBox = document.getElementById('feriasOrcamentoBox');
+    const orcamento = calcularOrcamentoFerias(dataInicio, diasTirados, liquido, data, impacto);
+    if(orcamento){
+      document.getElementById('feriasOrcamentoBrutoLinha').innerHTML = 'Dá pra gastar até <b class="mono pos">'+fmt(orcamento.bruto)+'</b>';
+      const seguroBox = document.getElementById('feriasOrcamentoSeguroBox');
+      if(orcamento.saldoMinimo > 0){
+        document.getElementById('feriasOrcamentoSeguroLinha').innerHTML = 'Dá pra gastar até <b class="mono pos">'+fmt(orcamento.seguro)+'</b>';
+        seguroBox.style.display = 'block';
+      }else{
+        seguroBox.style.display = 'none';
+      }
+      orcamentoBox.style.display = 'block';
+    }else{
+      orcamentoBox.style.display = 'none';
+    }
+    document.getElementById('btnLancarFerias').style.display = 'block';
+  });
+  document.getElementById('btnLancarFerias').addEventListener('click', async () => {
+    if(!ultimoCalculoFerias) return;
+    const descontou = ultimoCalculoFerias.desconto > 0;
+    const descricao = (ultimoCalculoFerias.modo==='integral' ? 'Férias (30 dias)' :
+      'Férias ('+ultimoCalculoFerias.diasTirados+' dias'+(ultimoCalculoFerias.diasVendidos>0 ? ' + '+ultimoCalculoFerias.diasVendidos+' vendidos' : '')+')') + (descontou ? ' (líquido)' : '');
+    if(!await confirmarApp('Isso vai lançar uma entrada de '+fmt(ultimoCalculoFerias.liquido)+' em '+formatBR(ultimoCalculoFerias.data)+'. Continuar?', 'Lançar férias')) return;
+    state.movimentacoes.push({
+      id: uid(), data: ultimoCalculoFerias.data, tipo:'entrada', valor: ultimoCalculoFerias.liquido,
+      categoria:'Férias', descricao, formaPagamento:'Transferência',
+      feriasInicio: ultimoCalculoFerias.dataInicio, feriasDias: ultimoCalculoFerias.diasTirados,
+      feriasImpacto: ultimoCalculoFerias.impacto,
+      recorrente:false, recorrenteQtdMeses:null, origemRecorrenteId:null, criadoEm:new Date().toISOString()
+    });
+    limparCache();
+    await salvarMovimentacoes();
+    mostrarToast('Férias lançadas');
+    irPara('dashboard');
   });
 
   function calcularImpactoSimulado(dataSim, tipoSim, valorCents, recorrenteSim, qtdSim){
@@ -2132,17 +2433,31 @@
     const dias = saldosDiariosIntervalo(isoInicio, isoFim);
     const diasFolego = diasFolegoNoIntervalo(isoInicio, isoFim);
 
+    // agrupa por mês com um cabeçalho sutil — só quando o intervalo realmente cruza mais de um mês
+    const mesesDistintos = new Set(dias.map(d => d.ano+'-'+d.mes)).size;
+    let mesAnterior = null;
     const linhas = dias.map(d => {
-      const diaSemana = DIAS_SEMANA_ABREV[new Date(d.ano, d.mes, d.dia).getDay()];
+      const diaSemanaNum = new Date(d.ano, d.mes, d.dia).getDay();
+      const diaSemana = DIAS_SEMANA_ABREV[diaSemanaNum];
       const classesExtra = [];
       if(d.iso === hojeISO) classesExtra.push('extrato-linha-hoje');
       if(diasFolego.has(d.iso)) classesExtra.push('extrato-linha-folego');
+      if(diaSemanaNum === 0 || diaSemanaNum === 6) classesExtra.push('extrato-linha-fimdesemana');
       const saldoNeg = d.saldo < 0;
+      let headerMes = '';
+      if(mesesDistintos > 1){
+        const chaveMes = d.ano+'-'+d.mes;
+        if(chaveMes !== mesAnterior){
+          headerMes = '<tr class="extrato-linha-mes"><td colspan="5">'+MESES[d.mes]+'</td></tr>';
+          mesAnterior = chaveMes;
+        }
+      }
       // dia com valor de diário DEFINIDO de propósito (mesmo que seja zero) vs dia sem nada configurado ainda
       const temDiarioDefinido = d.diario > 0 || state.movimentacoes.some(mv => mv.tipo==='diario' && mv.data===d.iso && !mv.recorrenteDiario);
-      return '<tr class="'+classesExtra.join(' ')+'">'+
+      const temFerias = state.movimentacoes.some(mv => mv.tipo==='entrada' && mv.categoria==='Férias' && mv.feriasInicio && d.iso >= mv.feriasInicio && d.iso < addDiasISO(mv.feriasInicio, mv.feriasDias));
+      return headerMes+'<tr class="'+classesExtra.join(' ')+'">'+
         '<td class="extrato-col-dia">'+String(d.dia).padStart(2,'0')+'/'+String(d.mes+1).padStart(2,'0')+'/'+String(d.ano).slice(-2)+'<small>'+diaSemana+'</small></td>'+
-        '<td class="extrato-col-num'+(d.entradas>0 ? ' extrato-entrada' : '')+'" data-iso="'+d.iso+'" data-tipo="entrada">'+(d.entradas>0 ? fmtNum(d.entradas) : '')+'</td>'+
+        '<td class="extrato-col-num'+(d.entradas>0 ? ' extrato-entrada' : '')+(temFerias ? ' extrato-entrada-ferias' : '')+'" data-iso="'+d.iso+'" data-tipo="entrada">'+(d.entradas>0 ? fmtNum(d.entradas) : '')+(temFerias ? '<span class="extrato-ferias-tag">🏖️ férias</span>' : '')+'</td>'+
         '<td class="extrato-col-num'+(d.saidas>0 ? ' extrato-saida' : '')+'" data-iso="'+d.iso+'" data-tipo="saida">'+(d.saidas>0 ? fmtNum(d.saidas) : '')+'</td>'+
         '<td class="extrato-col-num extrato-diario'+(d.diario>0 ? ' extrato-diario-com-valor' : '')+'" data-iso="'+d.iso+'">'+(temDiarioDefinido ? fmtNum(d.diario) : '<span class="extrato-zerar">def.</span>')+'</td>'+
         '<td class="extrato-col-num extrato-saldo'+(saldoNeg?' neg':'')+'">'+fmtNum(d.saldo)+'</td>'+
@@ -2449,7 +2764,7 @@
     document.getElementById('modalMeta').classList.add('show');
   }
   bindMoney(document.getElementById('metaValor'));
-  document.getElementById('btnSalvarMeta').addEventListener('click', () => {
+  document.getElementById('btnSalvarMeta').addEventListener('click', async () => {
     const nome = document.getElementById('metaNome').value.trim();
     const valor = centsFromInput(document.getElementById('metaValor'));
     const prazo = document.getElementById('metaPrazo').value;
@@ -2461,7 +2776,7 @@
     }else{
       state.metas.push({ id: uid(), nome, valorObjetivo: valor, valorAtual:0, dataInicio: todayISO(), dataLimite: prazo, status:'ativa' });
     }
-    salvarMetas();
+    await salvarMetas();
     document.getElementById('modalMeta').classList.remove('show');
     renderMetas();
   });
@@ -2469,7 +2784,7 @@
     const id = document.getElementById('metaId').value;
     if(!await confirmarApp('Excluir esta meta?', 'Excluir meta')) return;
     state.metas = state.metas.filter(m=>m.id!==id);
-    salvarMetas();
+    await salvarMetas();
     document.getElementById('modalMeta').classList.remove('show');
     renderMetas();
   });
@@ -2481,14 +2796,14 @@
     document.getElementById('modalAporte').classList.add('show');
   }
   bindMoney(document.getElementById('aporteValor'));
-  document.getElementById('btnSalvarAporte').addEventListener('click', () => {
+  document.getElementById('btnSalvarAporte').addEventListener('click', async () => {
     const id = document.getElementById('aporteMetaId').value;
     const valor = centsFromInput(document.getElementById('aporteValor'));
     if(valor<=0) return;
     const meta = state.metas.find(m=>m.id===id);
     meta.valorAtual += valor;
     if(meta.valorAtual >= meta.valorObjetivo) meta.status = 'concluida';
-    salvarMetas();
+    await salvarMetas();
     document.getElementById('modalAporte').classList.remove('show');
     mostrarToast('Valor guardado na meta');
     renderMetas();
@@ -2509,9 +2824,12 @@
     document.getElementById('cfgDiaRecebimento').value = state.config.diaRecebimento || '';
     setMoneyValue(document.getElementById('cfgDiarioValor'), valorDiarioPadraoAtual());
   }
-  bindMoney(document.getElementById('cfgSaldoInicial'), c => { state.config.saldoInicial = c; limparCache(); salvarConfig(); });
-  bindMoney(document.getElementById('cfgOrcamento'), c => { state.config.orcamentoMensal = c; salvarConfig(); });
-  bindMoney(document.getElementById('cfgSaldoMinimo'), c => { state.config.saldoMinimo = c; salvarConfig(); });
+  bindMoney(document.getElementById('cfgSaldoInicial'), c => { state.config.saldoInicial = c; });
+  document.getElementById('cfgSaldoInicial').addEventListener('blur', () => { limparCache(); salvarConfig(); });
+  bindMoney(document.getElementById('cfgOrcamento'), c => { state.config.orcamentoMensal = c; });
+  document.getElementById('cfgOrcamento').addEventListener('blur', () => salvarConfig());
+  bindMoney(document.getElementById('cfgSaldoMinimo'), c => { state.config.saldoMinimo = c; });
+  document.getElementById('cfgSaldoMinimo').addEventListener('blur', () => salvarConfig());
   document.getElementById('cfgDiaRecebimento').addEventListener('change', e => {
     const v = Math.max(1, Math.min(31, Number(e.target.value) || 0));
     if(v > 0){ state.config.diaRecebimento = v; limparCache(); salvarConfig(); }
@@ -2737,8 +3055,11 @@
     let inicioX = 0, inicioY = 0, inicioContagem = 0, inicioTempo = 0;
     const LIMIAR_PX = 60, LIMITE_TEMPO_MS = 800;
     function menuAberto(){ return document.getElementById('modalMais').classList.contains('show'); }
+    // fileiras roláveis na horizontal (chips de filtro, abas de intervalo) não devem disparar o gesto de trocar de tela
+    const SELETOR_AREAS_ROLAVEIS = '.chips, .rel-tabs, .extrato-range-tabs';
     document.addEventListener('touchstart', (e) => {
       if(document.body.classList.contains('modal-aberto') && !menuAberto()) { inicioContagem = 0; return; }
+      if(e.target.closest(SELETOR_AREAS_ROLAVEIS)) { inicioContagem = 0; return; }
       inicioContagem = e.touches.length;
       inicioX = e.touches[0].clientX;
       inicioY = e.touches[0].clientY;
